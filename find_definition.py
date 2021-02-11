@@ -34,7 +34,6 @@ print (dir_path)
 print (filename_noext)
 print (ext)
 print (org_depth)
-print (searchTerm)
 
 if len(temp_list) == 2:
     console.clear()
