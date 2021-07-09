@@ -40,18 +40,18 @@ def SearchForFileWithBaseClass(baseClass = "none"):
                                 return current_file
                             
 def FindBaseClassName():
-    searchTerms = r'^\s+(\bclass\b|\bstruct\b)\s+\w+.*public\s+(\w+)'
+    searchTerms = r'^\s+(\bclass\b|\bstruct\b)\s+\w+.*public\s+(virtual\s+)?(\w+::)?(\w+)'
     current_file = os.path.realpath(notepad.getCurrentFilename())
     with open(current_file, 'r') as read_obj:
         # Read all lines in the file one by one
         for idx, line in enumerate(read_obj):
             if re.search(searchTerms,line):
-                baseClass = re.sub(searchTerms, r'\2', line)
+                baseClass = re.sub(searchTerms, r'\4', line)
                 if baseClass:
                     return baseClass
     
 def ScrollToAttributeDef():
-    searchTerms = r'^\s*(?!return)(static\s+)?(const\s+)?(\w+::)?(\w+\s+)?(\w+(<.*>)?\s+)(\*|&)?\s*\b' + wordSelected + r'\b.*;'
+    searchTerms = r'^\s*(?!return)(static\s+)?(const\s+)?(\w+::)?(\w+(<.*>)?\s+)?(\w+(<.*>)?\s+)(\*|&)?\s*\b' + wordSelected + r'\b.*;'
     if (wordSelected):
         current_file = os.path.realpath(notepad.getCurrentFilename())
         print (current_file)
