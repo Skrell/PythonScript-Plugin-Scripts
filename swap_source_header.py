@@ -40,18 +40,18 @@ def SearchForFileWithBaseClass(baseClass = "none"):
                                 return current_file
                             
 def FindBaseClassName():
-    searchTerms = r'^\s+(\bclass\b|\bstruct\b)\s+\w+.*public\s+(virtual\s+)?(\w+::)?(\w+)'
+    searchTerms = r'^\s*(?!/)(\bclass\b|\bstruct\b)\s+\w+.*public\s+(virtual\s+)?(\w+::)?(\w+)'
     current_file = os.path.realpath(notepad.getCurrentFilename())
     with open(current_file, 'r') as read_obj:
         # Read all lines in the file one by one
         for idx, line in enumerate(read_obj):
             if re.search(searchTerms,line):
-                baseClass = re.sub(searchTerms, r'\4', line)
+                baseClass = re.sub(searchTerms, r'\5', line)
                 if baseClass:
                     return baseClass
     
 def ScrollToAttributeDef():
-    searchTerms = r'^\s*(?!return)(static\s+)?(const\s+)?(\w+::)?(\w+(<.*>)?\s+)?(\w+(<.*>)?\s+)(\*|&)?\s*\b' + wordSelected + r'\b.*;'
+    searchTerms = r'^\s*(?!/)(?!return)(static\s+)?(const\s+)?((\w+::){1,3})?(\w+(<.*>)?\s+)?(\w+(<.*>)?\s+)(\*|&)?\s*\b' + wordSelected + r'\b.*;'
     if (wordSelected):
         current_file = os.path.realpath(notepad.getCurrentFilename())
         print (current_file)
@@ -134,34 +134,38 @@ if len(temp_list) == 2:
     console.clear()
     if ext in [ 'cpp', 'c', 'h' ]:
         all_except_ext = temp_list[0]
-        if 'c' in ext:
-            assoc_file = all_except_ext + '.h'
-        else:
-            assoc_file = all_except_ext + '.c'
-            if not os.path.exists(assoc_file): 
-                assoc_file = all_except_ext + '.cpp'
-        if os.path.exists(assoc_file): 
-            notepad.open(assoc_file)
-            if (wordSelected):
-                if (ScrollToAttributeDef()):
-                    print "found it!"
+        if (wordSelected):
+            if (ScrollToAttributeDef()):
+                print "found it!"
+            else:
+                if 'c' in ext:
+                    assoc_file = all_except_ext + '.h'
                 else:
-                    print "attribute not found, looking for base class def..."
-                    foundFile = SearchForFileWithBaseClass(FindBaseClassName())
-                    if (foundFile):
-                        notepad.open(foundFile)
+                    assoc_file = all_except_ext + '.c'
+                    if not os.path.exists(assoc_file): 
+                        assoc_file = all_except_ext + '.cpp'
+                if os.path.exists(assoc_file): 
+                    notepad.open(assoc_file)
+                    if (wordSelected):
                         if (ScrollToAttributeDef()):
                             print "found it!"
                         else:
+                            print "attribute not found, looking for base class def..."
                             foundFile = SearchForFileWithBaseClass(FindBaseClassName())
-                            if (ScrollToAttributeDef()):
-                                print "found it 2 levels in!"
-                    else:
-                        print "can't find a file with the base class definition!"
-        else:
-            if SearchForOtherFile() == False:
-                console.show()
-                print "No accompanying file found"
+                            if (foundFile):
+                                notepad.open(foundFile)
+                                if (ScrollToAttributeDef()):
+                                    print "found it!"
+                                else:
+                                    foundFile = SearchForFileWithBaseClass(FindBaseClassName())
+                                    if (ScrollToAttributeDef()):
+                                        print "found it 2 levels in!"
+                            else:
+                                print "can't find a file with the base class definition!"
+                else:
+                    if SearchForOtherFile() == False:
+                        console.show()
+                        print "No accompanying file found"
     else:
         console.clear()
         console.writeError("UNSUPPORTED FILE TYPE")     

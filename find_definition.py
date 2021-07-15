@@ -14,7 +14,8 @@ org_depth = len(dir_path.split('\\'))
 TOTAL_DEPTH_UP = 6
 TOTAL_DEPTH_DOWN = 10 + TOTAL_DEPTH_UP
 killme = False
-findFileToOpen = False
+findLibraryFileToOpen = False
+foundFiles = {}
 
 wordSelected = editor.getSelText()
 if wordSelected.find("(") != -1: #found a function
@@ -25,7 +26,7 @@ else:
     console.writeError("NOT A FUNCTION\n")
 
 if wordSelected.find(".h") != -1: #found an include
-    findFileToOpen = True;
+    findLibraryFileToOpen = True;
     wordSelected = re.sub(r"(\w+/)?(\w+)/(\w+)", r"\2\\\3", wordSelected)
     print wordSelected
     
@@ -53,7 +54,7 @@ print (org_depth)
 print (wordSelected)
 
 def PauseAndGo(idx):
-    time.sleep(.300)
+    time.sleep(.100)
     editor.gotoLine(0)
     # editor.scrollCaret()
     # editor.gotoPos(editor.getCurrentPos())
@@ -61,17 +62,55 @@ def PauseAndGo(idx):
     editor.gotoLine(idx)
     return
 
+def FindCloserPath(path1, path2):
+    global org_depth
+    lenPath1 = len(path1.split('\\'))
+    lenPath2 = len(path2.split('\\'))
+    if abs(lenPath1 - org_depth) < abs(lenPath2 - org_depth):
+        # print path1, "vs", path2
+        # print lenPath1, "vs", lenPath2
+        # print abs(lenPath1 - org_depth), "vs", abs(lenPath2 - org_depth)
+        return path1
+    elif abs(lenPath1 - org_depth) == abs(lenPath2 - org_depth): 
+        return path1
+    else:
+        # print path1, "vs", path2
+        # print lenPath1, "vs", lenPath2
+        # print abs(lenPath1 - org_depth), "vs", abs(lenPath2 - org_depth)
+        return path2
+
+def FoundResult(current_file, idx):
+    global foundFiles
+    if len(foundFiles) == 0:
+        foundFiles[current_file] = os.path.basename(current_file)
+        notepad.open(current_file)
+    else:
+        for key, value in foundFiles.items():
+            if ((os.path.basename(current_file)) == value):
+                new_current_file = FindCloserPath(current_file, key)
+                notepad.open(new_current_file)
+            else:
+                foundFiles[current_file] = os.path.basename(current_file)
+                notepad.open(current_file)
+    
+    realidx = idx + 1
+    PauseAndGo(idx)
+    topLine = editor.getFirstVisibleLine() + 1
+    return realidx
+
+
 def SearchAFile(current_file):
     global wordSelected
-    foundResult = False
-    searchTerms1  = r'^\s*((class\s+)|(struct\s+))' + r'\b' + wordSelected + r'\b(?!.*;)'
-    searchTerms2  = r'^\s*(typedef)\s+.*' + r'\b' + wordSelected + r'\b;'
-    searchTerms2a = r'^\s*(using)\s+.*' + r'\b' + wordSelected + r'\b\s+.*=.*;'
-    searchTerms3  = r'^\s*((#define\s+.*)|(enum\s+.*)|(DECLARE_SMART_ENUM\())' + r'\b' + wordSelected + r'\b(?!.*;)'
-    searchTerms3a = r'^\s*(static\s+)?const.*' + r'\b' + wordSelected + r'(?!.*\()' + r'\b.*=.*;'
+    global foundFiles
+    result = False
+    searchTerms1  = r'^\s*(?!/)((class\s+)|(struct\s+))' + r'\b' + wordSelected + r'\b(?!.*;)'
+    searchTerms2  = r'^\s*(?!/)(typedef)\s+.*' + r'\b' + wordSelected + r'\b;'
+    searchTerms2a = r'^\s*(?!/)(using)\s+.*' + r'\b' + wordSelected + r'\b\s+.*=.*;'
+    searchTerms3  = r'^\s*(?!/)((#define\s+)|(enum\s+)|(DECLARE_SMART_ENUM\())' + r'\b' + wordSelected + r'\b(?!.*;)'
+    searchTerms3a = r'^\s*(?!/)(static\s+)?const.*' + r'\b' + wordSelected + r'(?!.*\()' + r'\b.*=.*;'
     # Function Definitions
-    searchTerms4 = r'^\s*(const\s+)?((\w+::)?\w+)?(\*|&)?\s*\w+::' + wordSelected + r'.*(?!.*;)'
-    searchTerms5 = r'^\s*(const\s+)?((\w+::)?\w+\s){1,2}(\*|&)?\s*' + wordSelected + r'.*\)\s+(const\s+)?(\{.*)?(?!.*;)'    
+    # searchTerms4 = r'^\s*(?!/)(inline\s+)?(const\s+)?((\w+::)?\w+\s)?(\*|&)?\w+::' + wordSelected + r'.*(?!.*;)'
+    searchTerms5 = r'^\s*(?!/)((\w+::)?\w+(<.*>)?\s+){1,2}(\*|&)?\s*' + r'(\w+::)?' + wordSelected + r'\s*(const\s+)?(\{.*)?(?!.*\);)'    
     with open(current_file, 'r') as read_obj:
         if wordSelected.find("(") == -1 and current_file.endswith(".h"): #not a func and a header
             # Read all lines in the file one by one
@@ -79,47 +118,32 @@ def SearchAFile(current_file):
                 # For each line, check if line contains the string
                 # if any(term in line for term in searchTerms):
                 if re.search(searchTerms1, line):
-                   notepad.open(current_file)
-                   realidx = idx + 1
-                   PauseAndGo(idx)
-                   topLine = editor.getFirstVisibleLine() + 1
-                   foundResult = True
+                   realidx = FoundResult(current_file, idx)
+                   result = True
                    console.writeError("FOUND SearchTerm1 IN " + current_file + " on line # " + str(realidx) + "!\n")
                    console.show()
                    break
                 elif re.search(searchTerms2, line):
-                   notepad.open(current_file)
-                   realidx = idx + 1
-                   PauseAndGo(idx)
-                   topLine = editor.getFirstVisibleLine() + 1
-                   foundResult = True
+                   realidx = FoundResult(current_file, idx)
+                   result = True
                    console.writeError("FOUND SearchTerm2 IN " + current_file + " on line # " + str(realidx) + "!\n")
                    console.show()
                    break
                 elif re.search(searchTerms2a, line):
-                   notepad.open(current_file)
-                   realidx = idx + 1
-                   PauseAndGo(idx)
-                   topLine = editor.getFirstVisibleLine() + 1
-                   foundResult = True
+                   realidx = FoundResult(current_file, idx)
+                   result = True
                    console.writeError("FOUND SearchTerm2a IN " + current_file + " on line # " + str(realidx) + "!\n")
                    console.show()
                    break
                 elif re.search(searchTerms3, line):
-                   notepad.open(current_file)
-                   realidx = idx + 1
-                   PauseAndGo(idx)
-                   topLine = editor.getFirstVisibleLine() + 1
-                   foundResult = True
+                   realidx = FoundResult(current_file, idx)
+                   result = True
                    console.writeError("FOUND SearchTerm3 IN " + current_file + " on line # " + str(realidx) + "!\n")
                    console.show()
                    break
                 elif re.search(searchTerms3a, line):
-                   notepad.open(current_file)
-                   realidx = idx + 1
-                   PauseAndGo(idx)
-                   topLine = editor.getFirstVisibleLine() + 1
-                   foundResult = True
+                   realidx = FoundResult(current_file, idx)
+                   result = True
                    console.writeError("FOUND SearchTerm3a IN " + current_file + " on line # " + str(realidx) + "!\n")
                    console.show()
                    break
@@ -128,25 +152,22 @@ def SearchAFile(current_file):
             for idx, line in enumerate(read_obj):                            
                 # For each line, check if line contains the string
                 # if any(term in line for term in searchTerms):
-                if re.search(searchTerms4, line):
-                   notepad.open(current_file)
-                   realidx = idx + 1
-                   PauseAndGo(idx)
-                   topLine = editor.getFirstVisibleLine() + 1
-                   foundResult = True
-                   console.writeError("FOUND searchTerms4 FUNC IN " + current_file + " on line # " + str(realidx) + "!\n")
-                   console.show()
-                   break
-                elif re.search(searchTerms5, line):
-                   notepad.open(current_file)
-                   realidx = idx + 1
-                   PauseAndGo(idx)
-                   topLine = editor.getFirstVisibleLine() + 1
-                   foundResult = True
+                # if re.search(searchTerms4, line):
+                   # notepad.open(current_file)
+                   # realidx = idx + 1
+                   # PauseAndGo(idx)
+                   # topLine = editor.getFirstVisibleLine() + 1
+                   # result = True
+                   # console.writeError("FOUND searchTerms4 FUNC IN " + current_file + " on line # " + str(realidx) + "!\n")
+                   # console.show()
+                   # break
+                if re.search(searchTerms5, line):
+                   realidx = FoundResult(current_file, idx)
+                   result = True
                    console.writeError("FOUND searchTerms5 FUNC IN " + current_file + " on line # " + str(realidx) + "!\n")
                    console.show()
                    break
-    return foundResult
+    return result
     
 def walk_error(error):
     print(error.filename)
@@ -171,14 +192,15 @@ if len(temp_list) == 2:
                 # print (current_file)
                 if (current_file_depth-org_depth) > TOTAL_DEPTH_DOWN:
                     continue
-                elif findFileToOpen and (wordSelected in current_file):
+                elif findLibraryFileToOpen and (wordSelected in current_file):
                     notepad.open(current_file)
                     done = True
                 else:
                     # Open the file in read only mode to start searching through
                     if os.path.exists(current_file):
                         if SearchAFile(current_file):
-                            done = True
+                            continue
+                            # done = True
                         else: 
                             continue
                 if done:
