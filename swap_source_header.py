@@ -65,8 +65,6 @@ def ScrollToAttributeDef():
                         editor.lineScroll(0,idx - (editor.linesOnScreen()/2))
                         editor.gotoLine(idx)
                         return True
-                    # else:
-                        # print "keeping looking..."
     return False
 
 def SearchForOtherFile():
@@ -76,12 +74,12 @@ def SearchForOtherFile():
     global org_depth
     global wordSelected
     killme = False
-    
+    print "Looking further..."
     if 'c' in ext:
         for root, directories, filenames in os.walk(dir_path + "\\.."*TOTAL_DEPTH_UP + "\\", topdown=True):
             filenames.sort()
             for filename in filenames:  
-                current_file = os.path.join(root, filename)
+                current_file = os.path.realpath(os.path.join(root, filename))
                 current_file_depth = len(current_file.split('\\'))
                 if (current_file_depth-org_depth) > TOTAL_DEPTH_DOWN:
                     # print ("I give up! ")
@@ -103,7 +101,7 @@ def SearchForOtherFile():
         for root, directories, filenames in os.walk(dir_path + "\\.."*TOTAL_DEPTH_UP + "\\", topdown=True):
             for filename in filenames:  
                 filenames.sort()
-                current_file = os.path.join(root, filename)
+                current_file = os.path.realpath(os.path.join(root, filename))
                 current_file_depth = len(current_file.split('\\'))
                 if (current_file_depth-org_depth) > TOTAL_DEPTH_DOWN:
                     # print ("I give up! ")
@@ -123,50 +121,55 @@ def SearchForOtherFile():
             # console.writeError("NONE FOUND!")
             # console.show()   
     return False
-    
+
+console.clear()    
 print (dir_path)
 print (filename_noext)
 print (ext)
 print (org_depth)
-print (wordSelected)
+if (wordSelected):
+    print (wordSelected)
 
-if len(temp_list) == 2:
-    console.clear()
+if (temp_list):
     if ext in [ 'cpp', 'c', 'h' ]:
         all_except_ext = temp_list[0]
-        if (wordSelected):
-            if (ScrollToAttributeDef()):
-                print "found it!"
+        # if (wordSelected):
+        if (wordSelected and ScrollToAttributeDef()):
+            print "found it!"
+        else:
+            if 'c' in ext:
+                assoc_file = all_except_ext + '.h'
             else:
-                if 'c' in ext:
-                    assoc_file = all_except_ext + '.h'
-                else:
-                    assoc_file = all_except_ext + '.c'
-                    if not os.path.exists(assoc_file): 
-                        assoc_file = all_except_ext + '.cpp'
-                if os.path.exists(assoc_file): 
-                    notepad.open(assoc_file)
-                    if (wordSelected):
-                        if (ScrollToAttributeDef()):
-                            print "found it!"
-                        else:
-                            print "attribute not found, looking for base class def..."
-                            foundFile = SearchForFileWithBaseClass(FindBaseClassName())
-                            if (foundFile):
-                                notepad.open(foundFile)
-                                if (ScrollToAttributeDef()):
-                                    print "found it!"
-                                else:
-                                    foundFile = SearchForFileWithBaseClass(FindBaseClassName())
-                                    if (ScrollToAttributeDef()):
-                                        print "found it 2 levels in!"
+                assoc_file = all_except_ext + '.c'
+                if not os.path.exists(assoc_file): 
+                    assoc_file = all_except_ext + '.cpp'
+            if os.path.exists(assoc_file): 
+                notepad.open(assoc_file)
+                if (wordSelected):
+                    if (ScrollToAttributeDef()):
+                        print "found it!"
+                    else:
+                        print "attribute not found, looking for base class def..."
+                        foundFile = SearchForFileWithBaseClass(FindBaseClassName())
+                        if (foundFile):
+                            notepad.open(foundFile)
+                            if (ScrollToAttributeDef()):
+                                print "found it!"
                             else:
-                                print "can't find a file with the base class definition!"
+                                foundFile = SearchForFileWithBaseClass(FindBaseClassName())
+                                if (ScrollToAttributeDef()):
+                                    print "found it 2 levels in!"
+                        else:
+                            print "can't find a file with the base class definition!"
                 else:
-                    if SearchForOtherFile() == False:
-                        console.show()
-                        print "No accompanying file found"
+                    print "found it!"
+            else:
+                if SearchForOtherFile() == False:
+                    console.show()
+                    print "No accompanying file found"
     else:
-        console.clear()
         console.writeError("UNSUPPORTED FILE TYPE")     
         console.show()
+else:
+    console.writeError("ERROR")     
+    console.show()

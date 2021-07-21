@@ -68,14 +68,15 @@ def FindCloserPath(path1, path2):
     lenPath2 = len(path2.split('\\'))
     if abs(lenPath1 - org_depth) < abs(lenPath2 - org_depth):
         # print path1, "vs", path2
-        # print lenPath1, "vs", lenPath2
+        print lenPath1, "vs", lenPath2
         # print abs(lenPath1 - org_depth), "vs", abs(lenPath2 - org_depth)
         return path1
     elif abs(lenPath1 - org_depth) == abs(lenPath2 - org_depth): 
+        print lenPath1, "vs", lenPath2
         return path1
     else:
         # print path1, "vs", path2
-        # print lenPath1, "vs", lenPath2
+        print lenPath1, "vs", lenPath2
         # print abs(lenPath1 - org_depth), "vs", abs(lenPath2 - org_depth)
         return path2
 
