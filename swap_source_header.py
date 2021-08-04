@@ -89,11 +89,9 @@ def SearchForOtherFile():
                     # print (os.path.join(root, filename))
                     if filename.lower() == (filename_noext.lower()+'.h'):
                         notepad.open(os.path.join(root, filename))
-                        if (ScrollToAttributeDef()):
-                            killme = True
-                            break
-            if killme:
-                return True
+                        ScrollToAttributeDef()
+                        killme = True
+                        return killme
         # else:
             # console.writeError("NONE FOUND!")     
             # console.show()
@@ -112,15 +110,10 @@ def SearchForOtherFile():
                     if filename.lower() == (filename_noext.lower()+'.c') or (filename.lower() == filename_noext.lower()+'.cpp'):
                         notepad.open(os.path.join(root, filename))
                         killme = True
-                        break
+                        return killme
                     else:
                         continue
-            if killme:
-                return True
-        # else:
-            # console.writeError("NONE FOUND!")
-            # console.show()   
-    return False
+    return killme
 
 console.clear()    
 print (dir_path)
@@ -164,9 +157,11 @@ if (temp_list):
                 else:
                     print "found it!"
             else:
-                if SearchForOtherFile() == False:
+                if (SearchForOtherFile() == False):
                     console.show()
                     print "No accompanying file found"
+                else:
+                    print "found it!"
     else:
         console.writeError("UNSUPPORTED FILE TYPE")     
         console.show()

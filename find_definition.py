@@ -184,7 +184,7 @@ if len(temp_list) == 2:
         else:
             for root, directories, filenames in os.walk(os.path.realpath(dir_path + "\\.."*TOTAL_DEPTH_UP + "\\"), topdown=True, onerror=walk_error):
                 for f in list(filenames):
-                    if f.endswith(".h") or f.endswith(".cpp"):
+                    if f.endswith(".h") or f.endswith(".cpp") or f.endswith(".c") or f.endswith(".hpp"):
                         f_names.append(os.path.realpath(os.path.join(root, f)))
             # f_names =  list(dict.fromkeys(f_names))  #--remove duplicates    
             for current_file in f_names:  
