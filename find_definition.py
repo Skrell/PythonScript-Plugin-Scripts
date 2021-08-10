@@ -6,7 +6,7 @@ import time
 console.clear()
 
 temp_list = notepad.getCurrentFilename().rsplit('.', 1)
-dir_path = os.path.dirname(os.path.realpath(notepad.getCurrentFilename()))
+dir_path = os.path.dirname(os.path.abspath(notepad.getCurrentFilename()))
 filename_noext = ((os.path.basename(notepad.getCurrentFilename())).rsplit('.', 1))[0]
 all_except_ext = temp_list[0]
 ext = temp_list[1].lower()
@@ -20,7 +20,7 @@ foundFiles = {}
 wordSelected = editor.getSelText()
 if wordSelected.find("(") != -1: #found a function
     wordSelected = re.sub(r"(\w+)\(", r"\1", wordSelected)
-    wordSelected = wordSelected + r'\('
+    wordSelected = wordSelected + r'\s*\('
     print wordSelected
 else:
     console.writeError("NOT A FUNCTION\n")
@@ -111,7 +111,7 @@ def SearchAFile(current_file):
     searchTerms3a = r'^\s*(?!/)(static\s+)?const.*' + r'\b' + wordSelected + r'(?!.*\()' + r'\b.*=.*;'
     # Function Definitions
     # searchTerms4 = r'^\s*(?!/)(inline\s+)?(const\s+)?((\w+::)?\w+\s)?(\*|&)?\w+::' + wordSelected + r'.*(?!.*;)'
-    searchTerms5 = r'^\s*(?!/)((\w+::)?\w+(<.*>)?\s+){1,2}(\*|&)?\s*' + r'(\w+::)?' + wordSelected + r'\s*(const\s+)?(\{.*)?(?!.*\);)'    
+    searchTerms5 = r'^\s*(?!/)((\w+::)?\w+(<.*>)?\s+){1,2}(\*|&)?\s*' + r'(\w+::)?' + wordSelected + r'\s*(const\s+)?(\{.*)?(?!.*\) (override)?(= 0)?;)'    
     with open(current_file, 'r') as read_obj:
         if wordSelected.find("(") == -1 and current_file.endswith(".h"): #not a func and a header
             # Read all lines in the file one by one
@@ -176,16 +176,21 @@ def walk_error(error):
 if len(temp_list) == 2:
     f_names = []
     done = False
+    # os.path.join(path, '') will add the trailing slash if it's not already there.
+    # You can do os.path.join(path, '', '') or os.path.join(path_with_a_trailing_slash, '') 
+    # and you will still only get one trailing slash.
+    topDir = os.path.join(os.path.abspath(dir_path + "\\.."*TOTAL_DEPTH_UP + "\\"), '')
+    print "topmost directory: ", topDir
     console.show()
     console.writeError("STARTING SEARCH...\n")     
     if ext in [ 'cpp', 'c', 'h' ]:
-        if SearchAFile(os.path.realpath(notepad.getCurrentFilename())):
+        if SearchAFile(os.path.abspath(notepad.getCurrentFilename())):
             done = True
         else:
-            for root, directories, filenames in os.walk(os.path.realpath(dir_path + "\\.."*TOTAL_DEPTH_UP + "\\"), topdown=True, onerror=walk_error):
+            for root, directories, filenames in os.walk(topDir, topdown=True, onerror=walk_error):
                 for f in list(filenames):
                     if f.endswith(".h") or f.endswith(".cpp") or f.endswith(".c") or f.endswith(".hpp"):
-                        f_names.append(os.path.realpath(os.path.join(root, f)))
+                        f_names.append(os.path.abspath(os.path.join(root, f)))
             # f_names =  list(dict.fromkeys(f_names))  #--remove duplicates    
             for current_file in f_names:  
                 # current_file = os.path.join(root, filename)
