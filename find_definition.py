@@ -183,7 +183,7 @@ if len(temp_list) == 2:
     print "topmost directory: ", topDir
     console.show()
     console.writeError("STARTING SEARCH...\n")     
-    if ext in [ 'cpp', 'c', 'h' ]:
+    if ext in [ 'cpp', 'c', 'h', 'hpp' ]:
         if SearchAFile(os.path.abspath(notepad.getCurrentFilename())):
             done = True
         else:
