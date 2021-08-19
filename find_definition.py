@@ -27,8 +27,8 @@ else:
 
 if wordSelected.find(".h") != -1: #found an include
     findLibraryFileToOpen = True;
-    wordSelected = re.sub(r"(\w+/)?(\w+)/(\w+)", r"\2\\\3", wordSelected)
-    print wordSelected
+    wordSelected = re.sub(r'(^#include ")?(\w+/)?(\w+)/(\w+\.h)(\")?', r'\3\\\4', wordSelected)
+    print "library path is ", wordSelected
     
 
 ## In short, to match a literal backslash, one has to write '\\\\' as the RE string, because the regular 
