@@ -216,3 +216,74 @@ if len(temp_list) == 2:
         console.writeError("UNSUPPORTED FILE TYPE\n")     
 console.writeError("DONE!\n")     
 console.hide()
+
+
+#    ------------------------------------------NOTES -------------------------------------
+#    Extract the file name (base name): os.path.basename()
+#    Use os.path.basename() to extract the file name from the path string.
+#    =======================================================================================
+#    File name with extension
+#    =======================================================================================
+#    os.path.basename() returns the string of the file name (base name) including the extension.
+#
+#    filepath = './dir/subdir/filename.ext'
+#    basename = os.path.basename(filepath)
+#    print(basename)
+#    # filename.ext
+#
+#    print(type(basename))
+#    # <class 'str'>
+#    =======================================================================================
+#    File name without extension
+#    =======================================================================================
+#    To extract the file name without the extension, use os.path.splitext() described later.
+#
+#    basename_without_ext = os.path.splitext(os.path.basename(filepath))[0]
+#    print(basename_without_ext)
+#    # filename
+#    os.path.splitext() split at the last (right) dot .. If you want to split by the first (left) dot ., use split().
+#
+#    Split strings in Python (delimiter, line break, regex, etc.)
+#    filepath_tar_gz = './dir/subdir/filename.tar.gz'
+#
+#    print(os.path.splitext(os.path.basename(filepath_tar_gz))[0])
+#    # filename.tar
+#
+#    print(os.path.basename(filepath_tar_gz).split('.', 1)[0])
+#    # filename
+#    =======================================================================================
+#    Extract the directory name (folder name): os.path.dirname()
+#    =======================================================================================
+#    Use os.path.dirname() to extract the directory name (folder name) from the path string.
+#
+#    filepath = './dir/subdir/filename.ext'
+#    dirname = os.path.dirname(filepath)
+#    print(dirname)
+#    # ./dir/subdir
+#
+#    print(type(dirname))
+#    # <class 'str'>
+#    =======================================================================================
+#    If you want to get only the directory name directly above the file, use os.path.basename().
+#    =======================================================================================
+#    subdirname = os.path.basename(os.path.dirname(filepath))
+#    print(subdirname)
+#    # subdir
+#    Get a file / dir name pair: os.path.split()
+#    Use os.path.split() to get both the file name and the directory name (folder name).
+#
+#    os.path.split() returns a tuple of file name returned by os.path.basename() and directory name returned by os.path.dirname().
+#
+#    filepath = './dir/subdir/filename.ext'
+#    base_dir_pair = os.path.split(filepath)
+#    print(base_dir_pair)
+#    # ('./dir/subdir', 'filename.ext')
+#
+#    print(type(base_dir_pair))
+#    # <class 'tuple'>
+#
+#    print(os.path.split(filepath)[0] == os.path.dirname(filepath))
+#    # True
+#
+#    print(os.path.split(filepath)[1] == os.path.basename(filepath))
+#    # True
