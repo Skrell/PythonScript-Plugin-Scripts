@@ -2,10 +2,10 @@ import os
 import re
 import time
 
-temp_list = notepad.getCurrentFilename().rsplit('.', 1)
+currentFile = notepad.getCurrentFilename().split('.', 1)
 dir_path = os.path.dirname(os.path.realpath(notepad.getCurrentFilename()))
-filename_noext = ((os.path.basename(notepad.getCurrentFilename())).rsplit('.', 1))[0]
-ext = temp_list[1].lower()
+filename_noext = ((os.path.basename(notepad.getCurrentFilename())).split('.', 1))[0]
+ext = currentFile[1].lower()
 org_depth = len(dir_path.split('\\'))
 TOTAL_DEPTH_UP = 3
 TOTAL_DEPTH_DOWN = 8 + TOTAL_DEPTH_UP
@@ -123,9 +123,9 @@ print (org_depth)
 if (wordSelected):
     print (wordSelected)
 
-if (temp_list):
+if (currentFile):
     if ext in [ 'cpp', 'c', 'h' ]:
-        all_except_ext = temp_list[0]
+        all_except_ext = currentFile[0]
         # if (wordSelected):
         if (wordSelected and ScrollToAttributeDef()):
             print "found it!"
