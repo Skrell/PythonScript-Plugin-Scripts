@@ -64,6 +64,7 @@ def main(argv):
         t.join()
         doFinalCheck = True
         tempDir = localVSBDir
+        numSrcFilesCommand = r'cmd /C dir /a:-d /s /b ' + tempDir + r' | find /c ":\"'
         print("DONE Copying from C:\\VSBs\n")
     elif os.path.exists(targetzip) and not os.path.exists(finalDirPath):
         if (ext == "zip"):
