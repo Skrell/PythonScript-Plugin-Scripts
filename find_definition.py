@@ -113,7 +113,7 @@ def SearchAFile(current_file):
     searchTerms3a = r'^\s*(?!/)(static\s+)?const.*' + r'\b' + wordSelected + r'\b(?!.*\()' + r'.*=.*;'
     # Function Definitions
     # searchTerms4 = r'^\s*(?!/)(inline\s+)?(const\s+)?((\w+::)?\w+\s)?(\*|&)?\w+::' + wordSelected + r'.*(?!.*;)'
-    searchTerms5 = r'^\s*(?!/)((\w+::)?\w+(<.*>)?\s+){1,2}(\*|&)?\s*' + r'(\w+::)?' + wordSelected + r'\s*(const\s+)?(\{.*)?(?!.*\))(override)?(= 0;)?'    
+    searchTerms5 = r'^\s*(?!/)((\w+::)?\w+(<.*>)?\s+){1,2}(\*|&)?\s*' + r'(\w+::)?' + wordSelected + r'\s*(const\s+)?(\{.*)?(override)?(= 0;)?'    
     with open(current_file, 'r') as read_obj:
         if wordSelected.find("(") == -1 and current_file.endswith(".h"): #not a func and a header
             # Read all lines in the file one by one
