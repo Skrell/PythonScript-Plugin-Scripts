@@ -16,6 +16,7 @@ TOTAL_DEPTH_DOWN = 10 + TOTAL_DEPTH_UP
 killme = False
 findLibraryFileToOpen = False
 foundFiles = {}
+TOTAL_RESULTS = 0
 
 wordSelected = editor.getSelText()
 if wordSelected.find("(") != -1: #found a function
@@ -103,15 +104,16 @@ def FoundResult(current_file, idx):
 def SearchAFile(current_file):
     global wordSelected
     global foundFiles
+    global TOTAL_RESULTS
     result = False
     searchTerms1  = r'^\s*(?!/)((class\s+)|(struct\s+))' + r'\b' + wordSelected + r'\b(?!.*;)'
     searchTerms2  = r'^\s*(?!/)(typedef)\s+.*' + r'\b' + wordSelected + r'\b;'
-    searchTerms2a = r'^\s*(?!/)(using)\s+.*' + r'\b' + wordSelected + r'\b\s+.*=.*;'
+    searchTerms2a = r'^\s*(?!/)using\s+.*' + r'\b' + wordSelected + r'\b\s+.*=.*;'
     searchTerms3  = r'^\s*(?!/)((#define\s+)|(enum\s+)|(DECLARE_SMART_ENUM\())' + r'\b' + wordSelected + r'\b(?!.*;)'
-    searchTerms3a = r'^\s*(?!/)(static\s+)?const.*' + r'\b' + wordSelected + r'(?!.*\()' + r'\b.*=.*;'
+    searchTerms3a = r'^\s*(?!/)(static\s+)?const.*' + r'\b' + wordSelected + r'\b(?!.*\()' + r'.*=.*;'
     # Function Definitions
     # searchTerms4 = r'^\s*(?!/)(inline\s+)?(const\s+)?((\w+::)?\w+\s)?(\*|&)?\w+::' + wordSelected + r'.*(?!.*;)'
-    searchTerms5 = r'^\s*(?!/)((\w+::)?\w+(<.*>)?\s+){1,2}(\*|&)?\s*' + r'(\w+::)?' + wordSelected + r'\s*(const\s+)?(\{.*)?(?!.*\) (override)?(= 0)?;)'    
+    searchTerms5 = r'^\s*(?!/)((\w+::)?\w+(<.*>)?\s+){1,2}(\*|&)?\s*' + r'(\w+::)?' + wordSelected + r'\s*(const\s+)?(\{.*)?(?!.*\))(override)?(= 0;)?'    
     with open(current_file, 'r') as read_obj:
         if wordSelected.find("(") == -1 and current_file.endswith(".h"): #not a func and a header
             # Read all lines in the file one by one
@@ -123,30 +125,35 @@ def SearchAFile(current_file):
                    result = True
                    console.writeError("FOUND SearchTerm1 IN " + current_file + " on line # " + str(realidx) + "!\n")
                    console.show()
+                   TOTAL_RESULTS += 1
                    break
                 elif re.search(searchTerms2, line):
                    realidx = FoundResult(current_file, idx)
                    result = True
                    console.writeError("FOUND SearchTerm2 IN " + current_file + " on line # " + str(realidx) + "!\n")
                    console.show()
+                   TOTAL_RESULTS += 1
                    break
                 elif re.search(searchTerms2a, line):
                    realidx = FoundResult(current_file, idx)
                    result = True
                    console.writeError("FOUND SearchTerm2a IN " + current_file + " on line # " + str(realidx) + "!\n")
                    console.show()
+                   TOTAL_RESULTS += 1
                    break
                 elif re.search(searchTerms3, line):
                    realidx = FoundResult(current_file, idx)
                    result = True
                    console.writeError("FOUND SearchTerm3 IN " + current_file + " on line # " + str(realidx) + "!\n")
                    console.show()
+                   TOTAL_RESULTS += 1
                    break
                 elif re.search(searchTerms3a, line):
                    realidx = FoundResult(current_file, idx)
                    result = True
                    console.writeError("FOUND SearchTerm3a IN " + current_file + " on line # " + str(realidx) + "!\n")
                    console.show()
+                   TOTAL_RESULTS += 1
                    break
         elif wordSelected.find("(") != -1:
             # Read all lines in the file one by one
@@ -167,6 +174,7 @@ def SearchAFile(current_file):
                    result = True
                    console.writeError("FOUND searchTerms5 FUNC IN " + current_file + " on line # " + str(realidx) + "!\n")
                    console.show()
+                   TOTAL_RESULTS += 1
                    break
     return result
     
@@ -215,7 +223,8 @@ if len(temp_list) == 2:
         console.clear()
         console.writeError("UNSUPPORTED FILE TYPE\n")     
 console.writeError("DONE!\n")     
-console.hide()
+if (TOTAL_RESULTS <= 1):
+    console.hide()
 
 
 #    ------------------------------------------NOTES -------------------------------------
