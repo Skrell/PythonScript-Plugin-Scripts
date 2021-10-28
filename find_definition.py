@@ -119,8 +119,8 @@ def SearchAFile(current_file):
     searchTerms2a = r'^\s*(?!/)using\s+.*' + r'\b' + wordSelected + r'\b\s+.*=.*;'
     searchTerms3  = r'^\s*(?!/)((#define\s+)|(enum\s+)|(DECLARE_SMART_ENUM\())' + r'\b' + wordSelected + r'\b(?!.*;)'
     searchTerms3a = r'^\s*(?!/)(static\s+)?const.*' + r'\b' + wordSelected + r'\b(?!.*\()' + r'.*=.*;'
+    searchTerms4  = r'\b' + wordSelected + r'\b,'
     # Function Definitions
-    # searchTerms4 = r'^\s*(?!/)(inline\s+)?(const\s+)?((\w+::)?\w+\s)?(\*|&)?\w+::' + wordSelected + r'.*(?!.*;)'
     searchTerms5 = r'^\s*(?!/)((\w+::)?\w+(<.*>)?\s+){1,2}(\*|&)?\s*' + r'(\w+::)?' + wordSelected + r'\s*(const\s+)?(\{.*)?(override)?(= 0;)?'    
     
     with open(current_file, 'r') as read_obj:
@@ -128,7 +128,11 @@ def SearchAFile(current_file):
             # Read all lines in the file one by one
             for idx, line in enumerate(read_obj):
                 if (lookForNamespace):
-                    if ((("namespace " + wordSelectedArray[i]) in line) or (("class " + wordSelectedArray[i]) in line)):
+                    if ((("namespace " + wordSelectedArray[i]) in line) or 
+                        (("class " + wordSelectedArray[i]) in line) or
+                        (("DECLARE_SMART_ENUM(" + wordSelectedArray[i]) in line) or
+                        (("enum " + wordSelectedArray) in line)
+                        ):
                         if len(wordSelectedArray) > 2:
                             i = 1
                         else:
@@ -168,6 +172,13 @@ def SearchAFile(current_file):
                        TOTAL_RESULTS += 1
                        break
                     elif re.search(searchTerms3a, line):
+                       realidx = FoundResult(current_file, idx)
+                       result = True
+                       console.writeError("FOUND SearchTerm3a IN " + current_file + " on line # " + str(realidx) + "!\n")
+                       console.show()
+                       TOTAL_RESULTS += 1
+                       break
+                    elif re.search(searchTerms4, line):
                        realidx = FoundResult(current_file, idx)
                        result = True
                        console.writeError("FOUND SearchTerm3a IN " + current_file + " on line # " + str(realidx) + "!\n")
