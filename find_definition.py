@@ -20,7 +20,7 @@ TOTAL_RESULTS = 0
 
 wordSelected = editor.getSelText()
 if wordSelected.find("(") != -1: #found a function
-    wordSelected = re.sub(r"(\w+)\(", r"\1", wordSelected)
+    wordSelected = re.sub(r"(\w+)\(.*", r"\1", wordSelected)
     wordSelected = wordSelected + r'\s*\('
     print wordSelected
 else:
@@ -131,10 +131,10 @@ def SearchAFile(current_file):
                     if ((("namespace " + wordSelectedArray[i]) in line) or 
                         (("class " + wordSelectedArray[i]) in line) or
                         (("DECLARE_SMART_ENUM(" + wordSelectedArray[i]) in line) or
-                        (("enum " + wordSelectedArray) in line)
+                        (("enum " + wordSelectedArray[i]) in line)
                         ):
-                        if len(wordSelectedArray) > 2:
-                            i = 1
+                        if ((len(wordSelectedArray) > 2) and (wordSelectedArray[i] != wordSelectedArray[-1])):
+                            i = i + 1
                         else:
                             mayContinue = True
                 else:
@@ -187,25 +187,28 @@ def SearchAFile(current_file):
                        break
         elif wordSelected.find("(") != -1:
             # Read all lines in the file one by one
-            for idx, line in enumerate(read_obj):                            
-                # For each line, check if line contains the string
-                # if any(term in line for term in searchTerms):
-                # if re.search(searchTerms4, line):
-                   # notepad.open(current_file)
-                   # realidx = idx + 1
-                   # PauseAndGo(idx)
-                   # topLine = editor.getFirstVisibleLine() + 1
-                   # result = True
-                   # console.writeError("FOUND searchTerms4 FUNC IN " + current_file + " on line # " + str(realidx) + "!\n")
-                   # console.show()
-                   # break
-                if re.search(searchTerms5, line):
-                   realidx = FoundResult(current_file, idx)
-                   result = True
-                   console.writeError("FOUND searchTerms5 FUNC IN " + current_file + " on line # " + str(realidx) + "!\n")
-                   console.show()
-                   TOTAL_RESULTS += 1
-                   break
+            for idx, line in enumerate(read_obj):
+                if (lookForNamespace):
+                    if ((("namespace " + wordSelectedArray[i]) in line) or 
+                        (("class " + wordSelectedArray[i]) in line) or
+                        (("DECLARE_SMART_ENUM(" + wordSelectedArray[i]) in line) or
+                        (("enum " + wordSelectedArray[i]) in line)
+                        ):
+                        if ((len(wordSelectedArray) > 2) and (wordSelectedArray[i] != wordSelectedArray[-1])):
+                            i = i + 1
+                        else:
+                            mayContinue = True
+                else:
+                    mayContinue = True
+                    
+                if (mayContinue):
+                    if re.search(searchTerms5, line):
+                       realidx = FoundResult(current_file, idx)
+                       result = True
+                       console.writeError("FOUND searchTerms5 FUNC IN " + current_file + " on line # " + str(realidx) + "!\n")
+                       console.show()
+                       TOTAL_RESULTS += 1
+                       break
     return result
     
 def walk_error(error):
