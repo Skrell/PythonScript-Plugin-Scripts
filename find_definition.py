@@ -74,6 +74,14 @@ def CheckForFoundHeader(current_file):
                 print("CLOSING " + current_file)
                 notepad.close()
                 return True
+    elif (current_file.endswith(".cpp")):
+        accompaniedFile = current_file.rsplit('.', 1)[0] + ".h"
+        for key, value in foundFiles.items():
+            if key == accompaniedFile:
+                print("CLOSING " + accompaniedFile)
+                notepad.activateFile(key)
+                notepad.close()
+                return True
     return False
 
 def FindCloserPath(path1, path2):
@@ -141,7 +149,8 @@ def SearchAFile(current_file):
     searchTerms3a = r'^\s*(?!/)(static\s+)?const.*' + r'\b' + wordSelected + r'\b(?!.*\()' + r'.*=.*;'
     searchTerms4  = r'\b' + wordSelected + r'\b,'
     # Function Definitions
-    searchTerms5 = r'^\s*(?!/)((\w+::)?\w+(<.*>)?\s+){0,2}(\*|&)?\s*' + r'((\w+::)|('+wordSelected+r'::))?' + wordSelected + r'\s*\(.*(\s*const\s+)?(\{.*)?(override)?(= 0;)?.*'    
+    searchTerms5h = r'^\s*(?!/)((\w+::)?\w+(<.*>)?\s+){0,2}(\*|&)?\s*' + r'((\w+::)|('+wordSelected+r'::))?' + wordSelected + r'\s*\(.*(\)\s+\bconst\b)?(\boverride\b)?(\)\s+\{.*)?(= 0;)?'    
+    searchTerms5c = r'^\s*(?!/)((\w+::)?\w+(<.*>)?\s+){0,2}(\*|&)?\s*' + r'((\w+::)|('+wordSelected+r'::))?' + wordSelected + r'\s*\(.*(\)\s+\bconst\b)?(?!\);\s*)$'    
     
     with open(current_file, 'r') as read_obj:
         if not funcDef and current_file.endswith(".h"): #not a func and a header
@@ -222,10 +231,17 @@ def SearchAFile(current_file):
                     mayContinue = True
                     
                 if (mayContinue):
-                    if re.search(searchTerms5, line):
+                    if current_file.endswith(".h") and re.search(searchTerms5h, line):
                        realidx = FoundResult(current_file, idx)
                        result = True
-                       console.writeError("FOUND searchTerms5 FUNC IN " + current_file + " on line # " + str(realidx) + "!\n")
+                       console.writeError("FOUND searchTerms5h FUNC IN " + current_file + " on line # " + str(realidx) + "!\n")
+                       console.show()
+                       TOTAL_RESULTS += 1
+                       break
+                    elif (current_file.endswith(".cpp") or current_file.endswith(".hpp")) and re.search(searchTerms5c, line):
+                       realidx = FoundResult(current_file, idx)
+                       result = True
+                       console.writeError("FOUND searchTerms5c FUNC IN " + current_file + " on line # " + str(realidx) + "!\n")
                        console.show()
                        TOTAL_RESULTS += 1
                        break
