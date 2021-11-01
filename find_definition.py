@@ -17,11 +17,13 @@ killme = False
 findLibraryFileToOpen = False
 foundFiles = {}
 TOTAL_RESULTS = 0
+funcDef = False
 
 wordSelected = editor.getSelText()
 if wordSelected.find("(") != -1: #found a function
     wordSelected = re.sub(r"(\w+)\(.*", r"\1", wordSelected)
-    wordSelected = wordSelected + r'\s*\('
+    # wordSelected = wordSelected + r'\s*\('
+    funcDef = True
     print wordSelected
 else:
     console.writeError("NOT A FUNCTION\n")
@@ -63,6 +65,17 @@ def PauseAndGo(idx):
     editor.gotoLine(idx)
     return
 
+def CheckForFoundHeader(current_file):
+    global foundFiles
+    if (current_file.endswith(".h")):
+        accompaniedFile = current_file.rsplit('.', 1)[0] + ".cpp"
+        for key, value in foundFiles.items():
+            if key == accompaniedFile:
+                print("CLOSING " + current_file)
+                notepad.close()
+                return True
+    return False
+
 def FindCloserPath(path1, path2):
     global org_depth
     lenPath1 = len(path1.split('\\'))
@@ -91,9 +104,13 @@ def FoundResult(current_file, idx):
             if ((os.path.basename(current_file)) == value):
                 new_current_file = FindCloserPath(current_file, key)
                 notepad.open(new_current_file)
+                if (CheckForFoundHeader(current_file)):
+                    return 0
             else:
                 foundFiles[current_file] = os.path.basename(current_file)
                 notepad.open(current_file)
+                if (CheckForFoundHeader(current_file)):
+                    return 0
     
     realidx = idx + 1
     PauseAndGo(idx)
@@ -105,10 +122,13 @@ def SearchAFile(current_file):
     global wordSelected
     global foundFiles
     global TOTAL_RESULTS
+    global funcDef
     result = False
     lookForNamespace = False
     mayContinue = False
     i = 0
+    # print(current_file)
+    
     if "::" in wordSelected:
         wordSelectedArray = wordSelected.split('::')
         wordSelected = wordSelectedArray[-1]
@@ -121,10 +141,10 @@ def SearchAFile(current_file):
     searchTerms3a = r'^\s*(?!/)(static\s+)?const.*' + r'\b' + wordSelected + r'\b(?!.*\()' + r'.*=.*;'
     searchTerms4  = r'\b' + wordSelected + r'\b,'
     # Function Definitions
-    searchTerms5 = r'^\s*(?!/)((\w+::)?\w+(<.*>)?\s+){1,2}(\*|&)?\s*' + r'(\w+::)?' + wordSelected + r'\s*(const\s+)?(\{.*)?(override)?(= 0;)?'    
+    searchTerms5 = r'^\s*(?!/)((\w+::)?\w+(<.*>)?\s+){0,2}(\*|&)?\s*' + r'((\w+::)|('+wordSelected+r'::))?' + wordSelected + r'\s*\(.*(\s*const\s+)?(\{.*)?(override)?(= 0;)?.*'    
     
     with open(current_file, 'r') as read_obj:
-        if wordSelected.find("(") == -1 and current_file.endswith(".h"): #not a func and a header
+        if not funcDef and current_file.endswith(".h"): #not a func and a header
             # Read all lines in the file one by one
             for idx, line in enumerate(read_obj):
                 if (lookForNamespace):
@@ -185,7 +205,7 @@ def SearchAFile(current_file):
                        console.show()
                        TOTAL_RESULTS += 1
                        break
-        elif wordSelected.find("(") != -1:
+        elif funcDef:
             # Read all lines in the file one by one
             for idx, line in enumerate(read_obj):
                 if (lookForNamespace):
