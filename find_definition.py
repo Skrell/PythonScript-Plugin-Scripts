@@ -151,7 +151,7 @@ def SearchAFile(current_file, firstSearch = False):
     searchTerms2  = r'^\s*(?!/)(typedef|using)\s+.*' + r'\b' + wordSelected + r'\b(\s+.*=.*)?;'
     # searchTerms2a = r'^\s*(?!/)using\s+.*' + r'\b' + wordSelected + r'\b\s+.*=.*;'
     searchTerms3  = r'^\s*(?!/)((#define\s+)|(enum\s+)|(DECLARE_SMART_ENUM\())' + r'\b' + wordSelected + r'\b(?!.*;)'
-    searchTerms3a = r'^\s*(?!/)(static\s+)?(const|auto)\s+' + r'\b' + wordSelected + r'\b' + r'.*=.*;'
+    searchTerms3a = r'^\s*(?!/)(static\s+)?((const|auto)\s+){0,2}' + r'\b' + wordSelected + r'\b' + r'.*((=.*;)|(\{))'
     searchTerms4  = r'\b' + wordSelected + r'\b,'
     # Function Definitions
     searchTerms5h1 = r'^\s*(?!/)((\w+::)?\w+(<.*>)?\s+){1,2}(\*|&)?\s*' + r'((\w+::)|('+wordSelected+r'::))?' + wordSelected + r'\s*\([\w\s\*&,:]*(\)\s+\bconst\b)?(\boverride\b)?(\s+\{)'    
