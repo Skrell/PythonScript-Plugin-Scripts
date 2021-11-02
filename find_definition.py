@@ -143,14 +143,16 @@ def SearchAFile(current_file):
         lookForNamespace = True
         
     searchTerms1  = r'^\s*(?!/)((class\s+)|(struct\s+))' + r'\b' + wordSelected + r'\b(?!.*;)'
-    searchTerms2  = r'^\s*(?!/)(typedef)\s+.*' + r'\b' + wordSelected + r'\b;'
-    searchTerms2a = r'^\s*(?!/)using\s+.*' + r'\b' + wordSelected + r'\b\s+.*=.*;'
+    searchTerms2  = r'^\s*(?!/)(typedef|using)\s+.*' + r'\b' + wordSelected + r'\b(\s+.*=.*)?;'
+    # searchTerms2a = r'^\s*(?!/)using\s+.*' + r'\b' + wordSelected + r'\b\s+.*=.*;'
     searchTerms3  = r'^\s*(?!/)((#define\s+)|(enum\s+)|(DECLARE_SMART_ENUM\())' + r'\b' + wordSelected + r'\b(?!.*;)'
     searchTerms3a = r'^\s*(?!/)(static\s+)?const.*' + r'\b' + wordSelected + r'\b(?!.*\()' + r'.*=.*;'
     searchTerms4  = r'\b' + wordSelected + r'\b,'
     # Function Definitions
-    searchTerms5h = r'^\s*(?!/)((\w+::)?\w+(<.*>)?\s+){0,2}(\*|&)?\s*' + r'((\w+::)|('+wordSelected+r'::))?' + wordSelected + r'\s*\(.*(\)\s+\bconst\b)?(\boverride\b)?(\)\s+\{.*)?(= 0;)?'    
-    searchTerms5c = r'^\s*(?!/)((\w+::)?\w+(<.*>)?\s+){0,2}(\*|&)?\s*' + r'((\w+::)|('+wordSelected+r'::))?' + wordSelected + r'\s*\(.*(\)\s+\bconst\b)?(?!\);\s*)$'    
+    searchTerms5h1 = r'^\s*(?!/)((\w+::)?\w+(<.*>)?\s+){1,2}(\*|&)?\s*' + r'((\w+::)|('+wordSelected+r'::))?' + wordSelected + r'\s*\([\w\s\*&,:]*(\)\s+\bconst\b)?(\boverride\b)?(\s+\{)'    
+    searchTerms5h2 = r'^\s*(?!/)((\w+::)?\w+(<.*>)?\s+){1,2}(\*|&)?\s*' + r'((\w+::)|('+wordSelected+r'::))?' + wordSelected + r'\s*\([\w\s\*&,:]*(\)\s+\bconst\b)?(\boverride\b)?(\s+= 0;)'    
+    searchTerms5h3 = r'^\s*(?!/)((\w+::)?\w+(<.*>)?\s+){0,2}(\*|&)?\s*' + r'((\w+::)|('+wordSelected+r'::))?' + wordSelected + r'\s*\([\w\s\*&,:]*$'    
+    searchTerms5c  = r'^\s*(?!/)((\w+::)?\w+(<.*>)?\s+){0,2}(\*|&)?\s*' + r'((\w+::)|('+wordSelected+r'::))?' + wordSelected + r'\s*\([\w\s\*&,:]*(\)\s+\bconst\b)?(?!\);\s*$)'    
     
     with open(current_file, 'r') as read_obj:
         if not funcDef and current_file.endswith(".h"): #not a func and a header
@@ -186,13 +188,13 @@ def SearchAFile(current_file):
                        console.show()
                        TOTAL_RESULTS += 1
                        break
-                    elif re.search(searchTerms2a, line):
-                       realidx = FoundResult(current_file, idx)
-                       result = True
-                       console.writeError("FOUND SearchTerm2a IN " + current_file + " on line # " + str(realidx) + "!\n")
-                       console.show()
-                       TOTAL_RESULTS += 1
-                       break
+                    # elif re.search(searchTerms2a, line):
+                       # realidx = FoundResult(current_file, idx)
+                       # result = True
+                       # console.writeError("FOUND SearchTerm2a IN " + current_file + " on line # " + str(realidx) + "!\n")
+                       # console.show()
+                       # TOTAL_RESULTS += 1
+                       # break
                     elif re.search(searchTerms3, line):
                        realidx = FoundResult(current_file, idx)
                        result = True
@@ -231,10 +233,10 @@ def SearchAFile(current_file):
                     mayContinue = True
                     
                 if (mayContinue):
-                    if current_file.endswith(".h") and re.search(searchTerms5h, line):
+                    if current_file.endswith(".h") and (re.search(searchTerms5h1, line) or re.search(searchTerms5h2, line) or re.search(searchTerms5h3, line)):
                        realidx = FoundResult(current_file, idx)
                        result = True
-                       console.writeError("FOUND searchTerms5h FUNC IN " + current_file + " on line # " + str(realidx) + "!\n")
+                       console.writeError("FOUND searchTerms5h1 FUNC IN " + current_file + " on line # " + str(realidx) + "!\n")
                        console.show()
                        TOTAL_RESULTS += 1
                        break
