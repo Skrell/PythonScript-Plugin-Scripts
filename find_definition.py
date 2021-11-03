@@ -84,6 +84,12 @@ def CheckForFoundHeader(current_file):
                 return True
     return False
 
+def GetDiffInPathLen(path1, path2):
+    lenPath1 = len(path1.split('\\'))
+    lenPath2 = len(path2.split('\\'))
+    diff = abs(lenPath1 - lenPath2)
+    return diff
+
 def FindCloserPath(path1, path2):
     global org_depth
     lenPath1 = len(path1.split('\\'))
@@ -152,7 +158,7 @@ def SearchAFile(current_file, firstSearch = False):
     # searchTerms2a = r'^\s*(?!/)using\s+.*' + r'\b' + wordSelected + r'\b\s+.*=.*;'
     searchTerms3  = r'^\s*(?!/)((#define\s+)|(enum\s+)|(DECLARE_SMART_ENUM\())' + r'\b' + wordSelected + r'\b(?!.*;)'
     searchTerms3a = r'^\s*(?!/)(static\s+)?((const|auto)\s+){0,2}' + r'\b' + wordSelected + r'\b' + r'.*((=.*;)|(\{))'
-    searchTerms4  = r'\b' + wordSelected + r'\b,'
+    searchTerms4  = r'\s+\b' + wordSelected + r'\b\s*,'
     # Function Definitions
     searchTerms5h1 = r'^\s*(?!/)((\w+::)?\w+(<.*>)?\s+){1,2}(\*|&)?\s*' + r'((\w+::)|('+wordSelected+r'::))?' + wordSelected + r'\s*\([\w\s\*&,:]*(\)\s+\bconst\b)?(\boverride\b)?(\s+\{)'    
     searchTerms5h2 = r'^\s*(?!/)((\w+::)?\w+(<.*>)?\s+){1,2}(\*|&)?\s*' + r'((\w+::)|('+wordSelected+r'::))?' + wordSelected + r'\s*\([\w\s\*&,:]*(\)\s+\bconst\b)?(\boverride\b)?(\s+= 0;)'    
@@ -281,7 +287,7 @@ if len(temp_list) == 2:
                 else:
                     # Open the file in read only mode to start searching through
                     if os.path.exists(current_file):
-                        if SearchAFile(current_file):
+                        if SearchAFile(current_file, False):
                             continue
                             # done = True
                         else: 
