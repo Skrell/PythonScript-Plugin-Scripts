@@ -18,6 +18,7 @@ findLibraryFileToOpen = False
 foundFiles = {}
 TOTAL_RESULTS = 0
 funcDef = False
+lookForNamespace = False
 
 wordSelected = editor.getSelText()
 if wordSelected.find("(") != -1: #found a function
@@ -137,8 +138,9 @@ def SearchAFile(current_file, firstSearch = False):
     global foundFiles
     global TOTAL_RESULTS
     global funcDef
+    global lookForNamespace
+    
     result = False
-    lookForNamespace = False
     mayContinue = False
     if not firstSearch:
         extension = ".h"
@@ -146,12 +148,6 @@ def SearchAFile(current_file, firstSearch = False):
         extension = current_file.rsplit('.', 1)[1]
         
     i = 0
-    # print(current_file)
-    
-    if "::" in wordSelected:
-        wordSelectedArray = wordSelected.split('::')
-        wordSelected = wordSelectedArray[-1]
-        lookForNamespace = True
         
     searchTerms1  = r'^(?!\s*/)\s*((class\s+)|(struct\s+))' + r'\b' + wordSelected + r'\b(?!.*;)'
     searchTerms2  = r'^(?!\s*/)\s*(typedef|using)\s+.*' + r'\b' + wordSelected + r'\b(\s+.*=.*)?;'
@@ -168,18 +164,16 @@ def SearchAFile(current_file, firstSearch = False):
         if not funcDef and current_file.endswith(extension): #not a func and a header
             # Read all lines in the file one by one
             for idx, line in enumerate(read_obj):
-                if (lookForNamespace):
-                    if ((("namespace " + wordSelectedArray[i]) in line) or 
-                        (("class " + wordSelectedArray[i]) in line) or
-                        (("DECLARE_SMART_ENUM(" + wordSelectedArray[i]) in line) or
-                        (("enum " + wordSelectedArray[i]) in line)
-                        ):
-                        if ((len(wordSelectedArray) > 2) and (wordSelectedArray[i] != wordSelectedArray[-1])):
+                if (lookForNamespace and not mayContinue):
+                    if (wordSelectedArray[i] != wordSelected):
+                        if ((("namespace " + wordSelectedArray[i]) in line) or 
+                            (("class " + wordSelectedArray[i]) in line) or
+                            (("DECLARE_SMART_ENUM(" + wordSelectedArray[i]) in line) or
+                            (("enum " + wordSelectedArray[i]) in line)):
+                            print("Found " + wordSelectedArray[i] + ", moving onto " + wordSelectedArray[i+1] + " in " + current_file)
                             i = i + 1
-                        else:
-                            mayContinue = True
-                else:
-                    mayContinue = True
+                    else:
+                        mayContinue = True
                     
                 if (mayContinue):    
                     # For each line, check if line contains the string
@@ -222,18 +216,16 @@ def SearchAFile(current_file, firstSearch = False):
         elif funcDef:
             # Read all lines in the file one by one
             for idx, line in enumerate(read_obj):
-                if (lookForNamespace):
-                    if ((("namespace " + wordSelectedArray[i]) in line) or 
-                        (("class " + wordSelectedArray[i]) in line) or
-                        (("DECLARE_SMART_ENUM(" + wordSelectedArray[i]) in line) or
-                        (("enum " + wordSelectedArray[i]) in line)
-                        ):
-                        if ((len(wordSelectedArray) > 2) and (wordSelectedArray[i] != wordSelectedArray[-1])):
+                if (lookForNamespace and not mayContinue):
+                    if (wordSelectedArray[i] != wordSelected):
+                        if ((("namespace " + wordSelectedArray[i]) in line) or 
+                            (("class " + wordSelectedArray[i]) in line) or
+                            (("DECLARE_SMART_ENUM(" + wordSelectedArray[i]) in line) or
+                            (("enum " + wordSelectedArray[i]) in line)):
+                            print("Found " + wordSelectedArray[i] + ", moving onto " + wordSelectedArray[i+1] + " in " + current_file)
                             i = i + 1
-                        else:
-                            mayContinue = True
-                else:
-                    mayContinue = True
+                    else:
+                        mayContinue = True
                     
                 if (mayContinue):
                     if current_file.endswith(".h") and (re.search(searchTerms5h1, line) or re.search(searchTerms5h2, line) or re.search(searchTerms5h3, line)):
@@ -266,6 +258,12 @@ if len(temp_list) == 2:
     console.show()
     console.writeError("STARTING SEARCH...\n")     
     if ext in [ 'cpp', 'c', 'h', 'hpp' ]:
+        if "::" in wordSelected:
+            wordSelectedArray = wordSelected.split('::')
+            wordSelected = wordSelectedArray[-1]
+            print("Looking for " + wordSelected)
+            lookForNamespace = True
+        
         if SearchAFile(os.path.abspath(notepad.getCurrentFilename()), True):
             done = True
         else:
