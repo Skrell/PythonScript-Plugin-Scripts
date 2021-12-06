@@ -158,7 +158,7 @@ def SearchAFile(current_file, firstSearch = False):
     searchTerms5h1 = r'^(?!\s*/)\s*((\w+::)?\w+(<.*>)?\s+){1,2}(\*|&)?\s*' + r'((\w+::)|('+wordSelected+r'::))?' + wordSelected + r'\s*\([\w\s\*&,:]*(\)\s+\bconst\b)?(\boverride\b)?(\s+\{)'    
     searchTerms5h2 = r'^(?!\s*/)\s*((\w+::)?\w+(<.*>)?\s+){1,2}(\*|&)?\s*' + r'((\w+::)|('+wordSelected+r'::))?' + wordSelected + r'\s*\([\w\s\*&,:]*(\)\s+\bconst\b)?(\boverride\b)?(\s+= 0;)'    
     searchTerms5h3 = r'^(?!\s*/)\s*((\w+::)?\w+(<.*>)?\s+){0,2}(\*|&)?\s*' + r'((\w+::)|('+wordSelected+r'::))?' + wordSelected + r'\s*\([\w\s\*&,:]*$'    
-    searchTerms5c  = r'^(?!\s*/)\s*((\w+::)?\w+(<.*>)?\s+){0,2}(\*|&)?\s*' + r'((\w+::)|('+wordSelected+r'::))?' + wordSelected + r'\s*\([\w\s\*&,:]*(\)\s+\bconst\b)?(?!.*;$)'    
+    searchTerms5c  = r'^(?!\s*/)\s*((\w+::)?\w+(<.*>)?\s+){0,2}(\*|&)?\s*' + r'((\w+::)|('+wordSelected+r'::))?' + wordSelected + r'\s*\([\w\s\*&,:]*(\)\s+\bconst\b)?(?!.*;)'    
     
     with open(current_file, 'r') as read_obj:
         if not funcDef and current_file.endswith(extension): #not a func and a header
