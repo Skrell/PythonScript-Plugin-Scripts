@@ -5,6 +5,7 @@ import time
 
 console.clear()
 
+selectedLine = editor.getCurLine().strip()
 temp_list = notepad.getCurrentFilename().rsplit('.', 1)
 dir_path = os.path.dirname(os.path.abspath(notepad.getCurrentFilename()))
 filename_noext = ((os.path.basename(notepad.getCurrentFilename())).rsplit('.', 1))[0]
@@ -55,6 +56,7 @@ print (dir_path)
 print (filename_noext)
 print (ext)
 print (org_depth)
+print (selectedLine)
 print (wordSelected)
 
 def PauseAndGo(idx):
@@ -139,6 +141,7 @@ def SearchAFile(current_file, firstSearch = False):
     global TOTAL_RESULTS
     global funcDef
     global lookForNamespace
+    global selectedLine
     
     result = False
     mayContinue = False
@@ -174,8 +177,10 @@ def SearchAFile(current_file, firstSearch = False):
                             i = i + 1
                     else:
                         mayContinue = True
-                    
-                if (mayContinue):    
+                else:
+                    mayContinue = True
+                
+                if (mayContinue and (line.strip() != selectedLine)):    
                     # For each line, check if line contains the string
                     # if any(term in line for term in searchTerms):
                     if re.search(searchTerms1, line):
@@ -209,7 +214,7 @@ def SearchAFile(current_file, firstSearch = False):
                     elif re.search(searchTerms4, line):
                        realidx = FoundResult(current_file, idx)
                        result = True
-                       console.writeError("FOUND SearchTerm3a IN " + current_file + " on line # " + str(realidx) + "!\n")
+                       console.writeError("FOUND SearchTerm4 IN " + current_file + " on line # " + str(realidx) + "!\n")
                        console.show()
                        TOTAL_RESULTS += 1
                        break
