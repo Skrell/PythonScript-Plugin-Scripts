@@ -145,6 +145,7 @@ def SearchAFile(current_file, firstSearch = False):
     
     result = False
     mayContinue = False
+    probablyEnum = False
     if not firstSearch:
         extension = ".h"
     else:
@@ -155,8 +156,8 @@ def SearchAFile(current_file, firstSearch = False):
     searchTerms1  = r'^(?!\s*/)\s*((class\s+)|(struct\s+))' + r'\b' + wordSelected + r'\b(?!.*;)'
     searchTerms2  = r'^(?!\s*/)\s*(typedef|using)\s+.*' + r'\b' + wordSelected + r'\b(\s+.*=.*)?;'
     searchTerms3  = r'^(?!\s*/)\s*((#define\s+)|(enum\s+)|(DECLARE_SMART_ENUM\())' + r'\b' + wordSelected + r'\b(?!.*;)'
-    searchTerms3a = r'^(?!\s*/)\s*(static\s+)?((const|auto|double|int|uint|float|uint8_t|uint16_t|uint32_t)\s+){0,2}' + r'(\w+::)?\b' + wordSelected + r'\b' + r'.*((\(\w+\);)|(=.*;)|(\{))'
-    searchTerms4  = r'\s+\b' + wordSelected + r'\b\s*,'
+    searchTerms3a = r'^(?!\s*/)\s*(static\s+)?((constexpr|const|auto|double|int|uint|float|uint8_t|uint16_t|uint32_t)\s+){1,2}\s*\*\s*' + r'(\w+::)?\b' + wordSelected + r'\b' + r'.*((\(\w+\);)|(=.*;))'
+    searchTerms4  = r'^(?!\s*/)\s*\b' + wordSelected + r'\b\s+(\= \d)?.*,'
     # Function Definitions
     searchTerms5h1 = r'^(?!\s*/)\s*((\w+::)?\w+(<.*>)?\s+){1,2}(\*|&)?\s*' + r'((\w+::)|('+wordSelected+r'::))?' + wordSelected + r'\s*\([\w\s\*&,:]*(\)\s+\bconst\b)?(\boverride\b)?(\s+\{)'    
     searchTerms5h2 = r'^(?!\s*/)\s*((\w+::)?\w+(<.*>)?\s+){1,2}(\*|&)?\s*' + r'((\w+::)|('+wordSelected+r'::))?' + wordSelected + r'\s*\([\w\s\*&,:]*(\)\s+\bconst\b)?(\boverride\b)?(\s+= 0;)'    
@@ -171,18 +172,26 @@ def SearchAFile(current_file, firstSearch = False):
                     if (wordSelectedArray[i] != wordSelected):
                         if ((("namespace " + wordSelectedArray[i]) in line) or 
                             (("class " + wordSelectedArray[i]) in line) or
-                            (("DECLARE_SMART_ENUM(" + wordSelectedArray[i]) in line) or
-                            (("enum " + wordSelectedArray[i]) in line)):
+                            (("DECLARE_SMART_ENUM(" + wordSelectedArray[i]) in line)):
                             print("Found " + wordSelectedArray[i] + ", moving onto " + wordSelectedArray[i+1] + " in " + current_file)
                             i = i + 1
+                        elif ("enum class " + wordSelectedArray[i]) in line:
+                            probablyEnum = True
+                            print("Found " + wordSelectedArray[i] + ", moving onto " + wordSelectedArray[i+1] + " in " + current_file)
+                            i = i + 1                        
                     else:
                         mayContinue = True
                 else:
                     mayContinue = True
                 
                 if (mayContinue and (line.strip() != selectedLine)):    
-                    # For each line, check if line contains the string
-                    # if any(term in line for term in searchTerms):
+                    if probablyEnum and (wordSelected in line):
+                       realidx = FoundResult(current_file, idx)
+                       result = True
+                       console.writeError("FOUND ENUM " + current_file + " on line # " + str(realidx) + "!\n")
+                       console.show()
+                       TOTAL_RESULTS += 1
+                       break
                     if re.search(searchTerms1, line):
                        realidx = FoundResult(current_file, idx)
                        result = True
