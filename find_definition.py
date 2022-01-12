@@ -59,25 +59,41 @@ print (org_depth)
 print (selectedLine)
 print (wordSelected)
 
-def FindMatchingBraceLine(arrayOfLines = [], currentLine = 0):
-    # print(currentLine)
-    lineNum = currentLine + 1
-    braceCount = 1
+def FindMatchingBraceLine(arrayOfLines = [], currentLine = 0, assumeBrace = False, reverseSearch = False):
+    print(currentLine)
+    lineIndex = currentLine - 1
+    braceCount = 0
+    if assumeBrace:
+        braceCount += 1
     matchingBraceLine = 0
-    while lineNum < (len(arrayOfLines)):
-        if '{' in arrayOfLines[lineNum]:
-            numOfInstances = arrayOfLines[lineNum].count('{')
+    while lineIndex < (len(arrayOfLines)) and not reverseSearch:
+        if '{' in arrayOfLines[lineIndex]:
+            numOfInstances = arrayOfLines[lineIndex].count('{')
             braceCount += numOfInstances
-            # print (arrayOfLines[lineNum], braceCount)
-        if '}' in arrayOfLines[lineNum]:
-            numOfInstances = arrayOfLines[lineNum].count('}')
+            print (arrayOfLines[lineIndex], braceCount)
+        if '}' in arrayOfLines[lineIndex]:
+            numOfInstances = arrayOfLines[lineIndex].count('}')
             braceCount -= numOfInstances
-            # print (arrayOfLines[lineNum], braceCount)
+            print (arrayOfLines[lineIndex], braceCount)
         if braceCount == 0:
-            matchingBraceLine = lineNum
-            # print (matchingBraceLine + 1)
+            matchingBraceLine = lineIndex
+            print (matchingBraceLine + 1)
             break
-        lineNum += 1
+        lineIndex += 1
+    while lineIndex > 0 and reverseSearch:
+        if '}' in arrayOfLines[lineIndex]:
+            numOfInstances = arrayOfLines[lineIndex].count('}')
+            braceCount += numOfInstances
+            print (arrayOfLines[lineIndex], braceCount)
+        if '{' in arrayOfLines[lineIndex]:
+            numOfInstances = arrayOfLines[lineIndex].count('{')
+            braceCount -= numOfInstances
+            print (arrayOfLines[lineIndex], braceCount)
+        if braceCount == 0:
+            matchingBraceLine = lineIndex
+            print (matchingBraceLine + 1)
+            break
+        lineIndex -= 1        
     return matchingBraceLine + 1
 
 def PauseAndGo(idx):
