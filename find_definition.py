@@ -59,6 +59,27 @@ print (org_depth)
 print (selectedLine)
 print (wordSelected)
 
+def FindMatchingBraceLine(arrayOfLines = [], currentLine = 0):
+    # print(currentLine)
+    lineNum = currentLine + 1
+    braceCount = 1
+    matchingBraceLine = 0
+    while lineNum < (len(arrayOfLines)):
+        if '{' in arrayOfLines[lineNum]:
+            numOfInstances = arrayOfLines[lineNum].count('{')
+            braceCount += numOfInstances
+            # print (arrayOfLines[lineNum], braceCount)
+        if '}' in arrayOfLines[lineNum]:
+            numOfInstances = arrayOfLines[lineNum].count('}')
+            braceCount -= numOfInstances
+            # print (arrayOfLines[lineNum], braceCount)
+        if braceCount == 0:
+            matchingBraceLine = lineNum
+            # print (matchingBraceLine + 1)
+            break
+        lineNum += 1
+    return matchingBraceLine + 1
+
 def PauseAndGo(idx):
     time.sleep(.100)
     editor.gotoLine(0)
@@ -234,8 +255,7 @@ def SearchAFile(current_file, firstSearch = False):
                     if (wordSelectedArray[i] != wordSelected):
                         if ((("namespace " + wordSelectedArray[i]) in line) or 
                             (("class " + wordSelectedArray[i]) in line) or
-                            (("DECLARE_SMART_ENUM(" + wordSelectedArray[i]) in line) or
-                            (("enum " + wordSelectedArray[i]) in line)):
+                            (("struct " + wordSelectedArray[i]) in line)):
                             print("Found " + wordSelectedArray[i] + ", moving onto " + wordSelectedArray[i+1] + " in " + current_file)
                             i = i + 1
                     else:
