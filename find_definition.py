@@ -185,6 +185,8 @@ def SearchAFile(current_file, firstSearch = False):
     searchTerms5h3 = r'^(?!\s*/)\s*((\w+::)?\w+(<.*>)?\s+){0,2}(\*|&)?\s*' + r'((\w+::)|('+wordSelected+r'::))?' + wordSelected + r'\s*\([\w\s\*&,:]*$'    
     searchTerms5c  = r'^(?!\s*/)\s*((\w+::)?\w+(<.*>)?\s+){0,2}(\*|&)?\s*' + r'((\w+::)|('+wordSelected+r'::))?' + wordSelected + r'\s*\([\w\s\*&,:]*(\)\s+\bconst\b)?(?!.*;)'    
     
+    linesArray = open(current_file, 'r').readlines()
+    
     with open(current_file, 'r') as read_obj:
         if not funcDef and current_file.endswith(extension): #not a func and a header
             # Read all lines in the file one by one
