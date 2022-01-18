@@ -198,7 +198,7 @@ def SearchAFile(current_file, firstSearch = False):
     # Function Definitions
     searchTerms5h1 = r'^(?!\s*/)\s*((\w+::)?\w+(<.*>)?\s+){1,2}(\*|&)?\s*' + r'((\w+::)|('+wordSelected+r'::))?' + wordSelected + r'\s*\([\w\s\*&,:]*(\)\s+\bconst\b)?(\boverride\b)?(\s+\{)'    
     searchTerms5h2 = r'^(?!\s*/)\s*((\w+::)?\w+(<.*>)?\s+){1,2}(\*|&)?\s*' + r'((\w+::)|('+wordSelected+r'::))?' + wordSelected + r'\s*\([\w\s\*&,:]*(\)\s+\bconst\b)?(\boverride\b)?(\s+= 0;)'    
-    searchTerms5h3 = r'^(?!\s*/)\s*((\w+::)?\w+(<.*>)?\s+){0,2}(\*|&)?\s*' + r'((\w+::)|('+wordSelected+r'::))?' + wordSelected + r'\s*\([\w\s\*&,:]*$'    
+    searchTerms5h3 = r'^(?!\s*/)\s*((\w+::)?\w+(<.*>)?\s+){0,2}(\*|&)?\s*' + r'((\w+::)|('+wordSelected+r'::))?' + wordSelected + r'\s*\([\w\s\*&,:\)]*$'    
     searchTerms5c  = r'^(?!\s*/)\s*((\w+::)?\w+(<.*>)?\s+){0,2}(\*|&)?\s*' + r'((\w+::)|('+wordSelected+r'::))?' + wordSelected + r'\s*\([\w\s\*&,:]*(\)\s+\bconst\b)?(?!.*;)'    
     
     linesArray = open(current_file, 'r').readlines()
@@ -278,12 +278,15 @@ def SearchAFile(current_file, firstSearch = False):
                             i = i + 1
                     else:
                         mayContinue = True
+                else:
+                    mayContinue = True
                     
                 if (mayContinue):
                     if current_file.endswith(".h") and (re.search(searchTerms5h1, line) or re.search(searchTerms5h2, line) or re.search(searchTerms5h3, line)):
+                       print("here")
                        realidx = FoundResult(current_file, idx)
                        result = True
-                       console.writeError("FOUND searchTerms5h1 FUNC IN " + current_file + " on line # " + str(realidx) + "!\n")
+                       console.writeError("FOUND searchTerms5h_ FUNC IN " + current_file + " on line # " + str(realidx) + "!\n")
                        console.show()
                        TOTAL_RESULTS += 1
                        break
