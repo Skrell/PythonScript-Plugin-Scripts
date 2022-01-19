@@ -59,13 +59,13 @@ print (org_depth)
 print (selectedLine)
 print (wordSelected)
 
-def FindMatchingBraceLine(arrayOfLines = [], currentLineNum = 0, assumeBrace = False, reverseSearch = False, braceType = '{'):
+def FindMatchingBraceLine(arrayOfLines = [], currentLineNum = 0, middleOfScope = False, reverseSearch = False, braceType = '{'):
     # print(currentLineNum)
     lineIndex = currentLineNum - 1
-    braceCount = 0
-    if assumeBrace:
-        braceCount += 1
+    openBraceCount = 0
+    closeBraceCount = 0
     matchingBraceLine = 0
+    startLookingForMatch = False
     
     if braceType == '{':
         openBrace  = '{'
@@ -77,20 +77,24 @@ def FindMatchingBraceLine(arrayOfLines = [], currentLineNum = 0, assumeBrace = F
         openBrace  = '['
         closeBrace = ']'
     
-    if not assumeBrace and ((openBrace or closeBrace) not in arrayOfLines[lineIndex]):
-        print("Specified brace not found on given line#")
-        return
+    if middleOfScope and not reverseSearch:
+        openBraceCount += 1
+        startLookingForMatch = True
+    elif middleOfScope and reverseSearch:
+        closeBraceCount += 1
+        startLookingForMatch = True
     
     while lineIndex < (len(arrayOfLines)) and not reverseSearch:
         if openBrace in arrayOfLines[lineIndex]:
             numOfInstances = arrayOfLines[lineIndex].count(openBrace)
-            braceCount += numOfInstances
-            # print (arrayOfLines[lineIndex], braceCount)
+            openBraceCount += numOfInstances
+            startLookingForMatch = True
+            # print (arrayOfLines[lineIndex], openBraceCount)
         if closeBrace in arrayOfLines[lineIndex]:
             numOfInstances = arrayOfLines[lineIndex].count(closeBrace)
-            braceCount -= numOfInstances
-            # print (arrayOfLines[lineIndex], braceCount)
-        if braceCount == 0:
+            closeBraceCount += numOfInstances
+            # print (arrayOfLines[lineIndex], closeBraceCount)
+        if startLookingForMatch and (openBraceCount-closeBraceCount == 0):
             matchingBraceLine = lineIndex
             # print (matchingBraceLine + 1)
             break
@@ -99,19 +103,23 @@ def FindMatchingBraceLine(arrayOfLines = [], currentLineNum = 0, assumeBrace = F
     while lineIndex > 0 and reverseSearch:
         if closeBrace in arrayOfLines[lineIndex]:
             numOfInstances = arrayOfLines[lineIndex].count(closeBrace)
-            braceCount += numOfInstances
-            # print (arrayOfLines[lineIndex].strip(), braceCount)
+            closeBraceCount += numOfInstances
+            startLookingForMatch = True
+            # print (arrayOfLines[lineIndex].strip(), closeBraceCount)
         if openBrace in arrayOfLines[lineIndex]:
             numOfInstances = arrayOfLines[lineIndex].count(openBrace)
-            braceCount -= numOfInstances
-            # print (arrayOfLines[lineIndex].strip(), braceCount)
-        if braceCount == 0:
+            openBraceCount += numOfInstances
+            # print (arrayOfLines[lineIndex].strip(), openBraceCount)
+        if startLookingForMatch and (openBraceCount-closeBraceCount == 0):
             matchingBraceLine = lineIndex
             # print (matchingBraceLine + 1)
             break
         lineIndex -= 1        
         
-    return matchingBraceLine + 1
+    if matchingBraceLine == 0:
+        return 0
+    else:
+        return (matchingBraceLine + 1)
 
 def PauseAndGo(idx):
     time.sleep(.100)
