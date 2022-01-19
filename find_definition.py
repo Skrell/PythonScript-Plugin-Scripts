@@ -59,41 +59,58 @@ print (org_depth)
 print (selectedLine)
 print (wordSelected)
 
-def FindMatchingBraceLine(arrayOfLines = [], currentLine = 0, assumeBrace = False, reverseSearch = False):
-    print(currentLine)
-    lineIndex = currentLine - 1
+def FindMatchingBraceLine(arrayOfLines = [], currentLineNum = 0, assumeBrace = False, reverseSearch = False, braceType = '{'):
+    # print(currentLineNum)
+    lineIndex = currentLineNum - 1
     braceCount = 0
     if assumeBrace:
         braceCount += 1
     matchingBraceLine = 0
+    
+    if braceType == '{':
+        openBrace  = '{'
+        closeBrace = '}'
+    elif braceType == '(':
+        openBrace  = '('
+        closeBrace = ')'
+    elif braceType == '[':
+        openBrace  = '['
+        closeBrace = ']'
+    
+    if not assumeBrace and ((openBrace or closeBrace) not in arrayOfLines[lineIndex]):
+        print("Specified brace not found on given line#")
+        return
+    
     while lineIndex < (len(arrayOfLines)) and not reverseSearch:
-        if '{' in arrayOfLines[lineIndex]:
-            numOfInstances = arrayOfLines[lineIndex].count('{')
+        if openBrace in arrayOfLines[lineIndex]:
+            numOfInstances = arrayOfLines[lineIndex].count(openBrace)
             braceCount += numOfInstances
-            print (arrayOfLines[lineIndex], braceCount)
-        if '}' in arrayOfLines[lineIndex]:
-            numOfInstances = arrayOfLines[lineIndex].count('}')
+            # print (arrayOfLines[lineIndex], braceCount)
+        if closeBrace in arrayOfLines[lineIndex]:
+            numOfInstances = arrayOfLines[lineIndex].count(closeBrace)
             braceCount -= numOfInstances
-            print (arrayOfLines[lineIndex], braceCount)
+            # print (arrayOfLines[lineIndex], braceCount)
         if braceCount == 0:
             matchingBraceLine = lineIndex
-            print (matchingBraceLine + 1)
+            # print (matchingBraceLine + 1)
             break
         lineIndex += 1
+        
     while lineIndex > 0 and reverseSearch:
-        if '}' in arrayOfLines[lineIndex]:
-            numOfInstances = arrayOfLines[lineIndex].count('}')
+        if closeBrace in arrayOfLines[lineIndex]:
+            numOfInstances = arrayOfLines[lineIndex].count(closeBrace)
             braceCount += numOfInstances
-            print (arrayOfLines[lineIndex], braceCount)
-        if '{' in arrayOfLines[lineIndex]:
-            numOfInstances = arrayOfLines[lineIndex].count('{')
+            # print (arrayOfLines[lineIndex].strip(), braceCount)
+        if openBrace in arrayOfLines[lineIndex]:
+            numOfInstances = arrayOfLines[lineIndex].count(openBrace)
             braceCount -= numOfInstances
-            print (arrayOfLines[lineIndex], braceCount)
+            # print (arrayOfLines[lineIndex].strip(), braceCount)
         if braceCount == 0:
             matchingBraceLine = lineIndex
-            print (matchingBraceLine + 1)
+            # print (matchingBraceLine + 1)
             break
         lineIndex -= 1        
+        
     return matchingBraceLine + 1
 
 def PauseAndGo(idx):
