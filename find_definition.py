@@ -5,6 +5,7 @@ import time
 
 console.clear()
 
+selectedLineNumber = editor.lineFromPosition(editor.getCurrentPos())
 selectedLine = editor.getCurLine().strip()
 temp_list = notepad.getCurrentFilename().rsplit('.', 1)
 dir_path = os.path.dirname(os.path.abspath(notepad.getCurrentFilename()))
