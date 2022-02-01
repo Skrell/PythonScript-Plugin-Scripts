@@ -12,6 +12,10 @@ TOTAL_DEPTH_DOWN = 8 + TOTAL_DEPTH_UP
 killme = False
 
 wordSelected = editor.getSelText()
+lineNumSelected = editor.lineFromPosition(editor.getCurrentPos())
+
+functionDef = False
+headerDef = False
 
 def SearchForFileWithBaseClass(baseClass = "none"):
     if (baseClass == "none"):
@@ -46,11 +50,12 @@ def FindBaseClassName():
         # Read all lines in the file one by one
         for idx, line in enumerate(read_obj):
             if re.search(searchTerms,line):
-                baseClass = re.sub(searchTerms, r'\5', line)
+                baseClass = re.sub(searchTerms, r'\4', line)
                 if baseClass:
-                    return baseClass
+                    return baseClass.rstrip()
+    return ""
     
-def ScrollToAttributeDef():
+def ScrollToAttributeDef(stopLine = 0, isFunction = False):
     searchTerms = r'^\s*(?!/)(?!return)(static\s+)?(const\s+)?((\w+::){1,3})?(\w+(<.*>)?\s+)?(\w+(<.*>)?\s+)(\*|&)?\s*\b' + wordSelected + r'\b.*;'
     if (wordSelected):
         current_file = os.path.realpath(notepad.getCurrentFilename())
@@ -59,7 +64,21 @@ def ScrollToAttributeDef():
             with open(current_file, 'r') as read_obj:
                 # Read all lines in the file one by one
                 for idx, line in enumerate(read_obj):
-                    if re.search(searchTerms, line):
+                    if stopLine > 0 and idx+1 == stopLine:
+                        return False
+                    elif headerDef and isFunction and wordSelected.replace(" ", "") in line.replace(" ", ""): #remove all spaces
+                        time.sleep(.300)
+                        editor.gotoLine(0)
+                        editor.lineScroll(0,idx - (editor.linesOnScreen()/2))
+                        editor.gotoLine(idx)
+                        return True
+                    elif isFunction and ("::" + wordSelected.replace(" ", "")) in line.replace(" ", ""): #remove all spaces
+                        time.sleep(.300)
+                        editor.gotoLine(0)
+                        editor.lineScroll(0,idx - (editor.linesOnScreen()/2))
+                        editor.gotoLine(idx)
+                        return True
+                    elif not isFunction and re.search(searchTerms, line):
                         time.sleep(.300)
                         editor.gotoLine(0)
                         editor.lineScroll(0,idx - (editor.linesOnScreen()/2))
@@ -92,9 +111,6 @@ def SearchForOtherFile():
                         ScrollToAttributeDef()
                         killme = True
                         return killme
-        # else:
-            # console.writeError("NONE FOUND!")     
-            # console.show()
     else: #file is a header file and hence we're looking for its cpp
         for root, directories, filenames in os.walk(dir_path + "\\.."*TOTAL_DEPTH_UP + "\\", topdown=True):
             for filename in filenames:  
@@ -121,14 +137,19 @@ print (filename_noext)
 print (ext)
 print (org_depth)
 if (wordSelected):
+    if wordSelected.find("(") != -1: #found a function def
+        functionDef = True
+    wordSelected = wordSelected.rstrip(";")
+    wordSelected = wordSelected.replace("::", "")
+    wordSelected = wordSelected.replace("override", "")
     print (wordSelected)
 
 if (currentFile):
     if ext in [ 'cpp', 'c', 'h' ]:
         all_except_ext = currentFile[0]
-        # if (wordSelected):
-        if (wordSelected and ScrollToAttributeDef()):
+        if ('h' in ext and wordSelected and ScrollToAttributeDef(lineNumSelected, functionDef)):
             print "found it!"
+            print "DONE!"
         else:
             if 'c' in ext:
                 assoc_file = all_except_ext + '.h'
@@ -138,33 +159,46 @@ if (currentFile):
                     assoc_file = all_except_ext + '.cpp'
             if os.path.exists(assoc_file): 
                 notepad.open(assoc_file)
+                print("Opened: ", assoc_file)
                 if (wordSelected):
-                    if (ScrollToAttributeDef()):
+                    if (ScrollToAttributeDef(0, functionDef)):
                         print "found it!"
-                    else:
+                        print "DONE!2"
+                    elif not functionDef and headerDef:
                         print "attribute not found, looking for base class def..."
-                        foundFile = SearchForFileWithBaseClass(FindBaseClassName())
-                        if (foundFile):
-                            notepad.open(foundFile)
-                            if (ScrollToAttributeDef()):
-                                print "found it!"
-                            else:
-                                foundFile = SearchForFileWithBaseClass(FindBaseClassName())
+                        base = FindBaseClassName()
+                        print("Base class name is ", base)
+                        if base:
+                            foundFile = SearchForFileWithBaseClass(FindBaseClassName())
+                            if (foundFile):
+                                notepad.open(foundFile)
                                 if (ScrollToAttributeDef()):
-                                    print "found it 2 levels in!"
+                                    print "found it!"
+                                else:
+                                    foundFile = SearchForFileWithBaseClass(FindBaseClassName())
+                                    if (ScrollToAttributeDef(0, functionDef)):
+                                        print "found it 2 levels in!"
+                                    else:
+                                        console.show()
+                                        console.writeError("Found the class but not the member...DONE")
+                            else:
+                                print "can't find a file with the base class definition!"
                         else:
-                            print "can't find a file with the base class definition!"
+                            notepad.open(currentFile[0] + "." + currentFile[1])
+                            console.show()
+                            console.writeError("FAILED to find base class to search")
                 else:
                     print "found it!"
             else:
                 if (SearchForOtherFile() == False):
                     console.show()
-                    print "No accompanying file found"
+                    console.writeError("No accompanying file found")
                 else:
+                    ScrollToAttributeDef(0, functionDef)
                     print "found it!"
     else:
-        console.writeError("UNSUPPORTED FILE TYPE")     
         console.show()
+        console.writeError("UNSUPPORTED FILE TYPE")     
 else:
-    console.writeError("ERROR")     
     console.show()
+    console.writeError("ERROR")     
