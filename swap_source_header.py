@@ -44,15 +44,19 @@ def SearchForFileWithBaseClass(baseClass = "none"):
                                 return current_file
                             
 def FindBaseClassName():
+    global lineNumSelected
+    lineIndex = lineNumSelected
     searchTerms = r'^\s*(?!/)(\bclass\b|\bstruct\b)\s+\w+.*public\s+(virtual\s+)?(\w+::)?(\w+)'
     current_file = os.path.realpath(notepad.getCurrentFilename())
-    with open(current_file, 'r') as read_obj:
-        # Read all lines in the file one by one
-        for idx, line in enumerate(read_obj):
-            if re.search(searchTerms,line):
-                baseClass = re.sub(searchTerms, r'\4', line)
-                if baseClass:
-                    return baseClass.rstrip()
+    
+    fileArray = open(curren_file, 'r').readlines()
+    
+    while (lineIndex > 0):
+        if re.search(searchTerms,fileArray[lineIndex]):
+            baseClass = re.sub(searchTerms, r'\4', fileArray[lineIndex])
+            if baseClass:
+                return baseClass.rstrip()        
+        lineIndex -= 1
     return ""
     
 def ScrollToAttributeDef(stopLine = 0, isFunction = False):
@@ -140,7 +144,7 @@ if (wordSelected):
     if wordSelected.find("(") != -1: #found a function def
         functionDef = True
     wordSelected = wordSelected.rstrip(";")
-    wordSelected = wordSelected.replace("::", "")
+    # wordSelected = wordSelected.replace("::", "")
     wordSelected = wordSelected.replace("override", "")
     print (wordSelected)
 
