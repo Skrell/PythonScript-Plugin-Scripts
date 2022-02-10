@@ -2,6 +2,7 @@
 import os
 import re
 import time
+from difflib import SequenceMatcher
 
 console.clear()
 
@@ -59,6 +60,26 @@ print (ext)
 print (org_depth)
 print (selectedLine)
 print (wordSelected)
+
+class Signature(object):
+    def __init__(self, string = "", lineStart = 0, lineSteop = 0):
+        self.string = string
+        self.lineStart = lineStart
+        self.lineStop = lineStop
+        
+def FindHighestCorrelation(codestring = "", codeStringsArray = []):
+    highestMatch = 0.0
+    highestIdx = 0
+    
+    for idx, entry in enumerate(codeStringsArray):
+        similarity_ratio = SequenceMatcher(None, codeString.rstrip('\r\n'),entry.string.rstrip('\r\n')).ratio()
+        if similarity_ratio > highestMatch:
+            highestMatch = similarity_ratio
+            highestIdx = idx
+    print(highestMatch)
+    print("BEST MATCH: " + codestring + " vs ")
+    print("            " + codeStringsArray[highestIdx].string)
+    return highestIdx
 
 def FindMatchingBraceLine(arrayOfLines = [], currentLineNum = 0, middleOfScope = False, reverseSearch = False, braceType = '{'):
     # print(currentLineNum)
