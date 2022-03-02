@@ -12,6 +12,7 @@ def animate():
     done = False
     for c in itertools.cycle(['|','/','-','\\']):
         if done:
+            sys.stdout.flush()
             print()
             break;
         else:
@@ -23,11 +24,10 @@ def animate():
     return
     
 def getNumberOfFiles(targetDir = ""):
-    initial_count = 0
-    for path in os.listdir(targetDir):
-        if os.path.isfile(os.path.join(targetDir, path)):
-            initial_count += 1
-    return initial_count
+    total = 0
+    for path, dirs, files in os.walk(targetDir):
+        total += len(files)
+    return total
     
 def main(argv):
     if len(argv) != 2:
@@ -60,19 +60,22 @@ def main(argv):
     print("Extension  is: " + ext)
     print("Target Dir is: " + finalDirPath)
     
-    if (os.path.exists(tempDir) and os.path.exists(finalDirPath)):
-        if (getNumberOfFiles(tempDir) > 0 and getNumberOfFiles(tempDir) == getNumberOfFiles(finalDirPath)):
+    if os.path.exists(finalDirPath) and getNumberOfFiles(finalDirPath) > 0:
+        print("FOUND ", getNumberOfFiles(finalDirPath))
+        if (getNumberOfFiles(tempDir) == getNumberOfFiles(finalDirPath)):
+            print("================== VERIFIED AND DONE ========================")
+            return
+        elif (getNumberOfFiles(localVSBDir) == getNumberOfFiles(finalDirPath)):
             print("================== VERIFIED AND DONE ========================")
             return
         else:
-            os.system("cmd /C rmdir /s /q " + tempDir)
-    elif os.path.exists(localVSBDir) and os.path.exists(finalDirPath):
-        if (getNumberOfFiles(localVSBDir) > 0 and getNumberOfFiles(localVSBDir) == getNumberOfFiles(finalDirPath)):
-            print("================== VERIFIED AND DONE ========================")
-            return
-        else:
-            os.system("cmd /C rmdir /s /q " + localVSBDir)
-            os.makedirs(localVSBDir)
+            print("================== MISMATCH # OF FILES, CLEANING ========================")
+            if os.path.exists(tempDir):
+                os.system("cmd /C rmdir /s /q " + tempDir)
+            if os.path.exists(localVSBDir):
+                os.system("cmd /C rmdir /s /q " + localVSBDir)
+            if os.path.exists(finalDirPath):
+                os.system("cmd /C rmdir /s /q " + finalDirPath)
     
     if os.path.exists(localVSBDir) and getNumberOfFiles(localVSBDir) > 0 and not (os.path.exists(finalDirPath)):
         print("Found an existing folder for this VSB under " + localVSBDir + " and will use it!")
