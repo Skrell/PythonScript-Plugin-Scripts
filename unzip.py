@@ -3,15 +3,16 @@ import sys
 import threading
 import itertools
 import time
-import subprocess
 from zipfile import ZipFile
 
 done = False
-def animate();
+
+def animate():
     global done
     done = False
     for c in itertools.cycle(['|','/','-','\\']):
         if done:
+            print()
             break;
         else:
             sys.stdout.write('\rWorking... ' + c)
@@ -21,23 +22,35 @@ def animate();
     sys.stdout.flush()
     return
     
+def getNumberOfFiles(targetDir = ""):
+    initial_count = 0
+    for path in os.listdir(targetDir):
+        if os.path.isfile(os.path.join(targetDir, path)):
+            initial_count += 1
+    return initial_count
     
 def main(argv):
+    if len(argv) != 2:
+        print("==================INCORRECT NUMBER OF PARAMETERS==================")
+        for idx, v in enumerate(argv):
+            print(idx,"is",v)
+        print("======================== DONE =================================")
+        return
+        
     targetzip = os.path.normpath(argv[1])
     path_folders = targetzip.split(os.sep)
     baseDir = os.path.dirname(targetzip)
     filenameNoExt = os.path.basename(targetzip).split('.',1)[0]
     ext = os.path.basename(targetzip).split('.',1)[1]
     finalDirPath = baseDir + "\\" + filenameNoExt + "\\"
-    tempDir = "C:\\TEMP\\" + filenameNoExt
     localVSBDir = "C:\\VSBs\\Boards\\" + path_folders[2] + "\\" + filenameNoExt
+    tempDir = "C:\\Temp" + filenameNoExt
+   
     copyCommand = "cmd /C xcopy /E /Y /Q " + tempDir + " " + finalDirPath
+    copyCommandThread = "@start /b cmd /C xcopy /E /Y /Q " + tempDir + " " + localVSBDir
     recopyCommand = "cmd /C xcopy /E /Y /Q " + localVSBDir + " " + finalDirPath
     deleteCommandThread = "@start /b cmd /C rmdir /s /q " + tempDir
-    deleteCommand = "cmd /C rmdir /s /q " + tempDir
-    untarCommand = "cmd /C tar -xyzf " + targetzip + " -C " + baseDir
-    numSrcFilesCommand = r'cmd /C dir /a:-d /s /b ' + tempDir + r' | find /c ":\"'
-    numTgtFilesCommand = r'cmd /C dir /a:-d /s /b ' + finalDirPath + r' | find /c ":\"'
+    untarCommand = "cmd /C tar -xzf " + targetzip + " -C " + baseDir
     
     global done
     doFinalCheck = False
@@ -48,13 +61,20 @@ def main(argv):
     print("Target Dir is: " + finalDirPath)
     
     if (os.path.exists(tempDir) and os.path.exists(finalDirPath)):
-        if (subprocess.getoutput(numSrcFilesCommand) == subprocess.getoutput(numTgtFilesCommand)):
+        if (getNumberOfFiles(tempDir) > 0 and getNumberOfFiles(tempDir) == getNumberOfFiles(finalDirPath)):
             print("================== VERIFIED AND DONE ========================")
             return
         else:
-            os.system(deleteCommand)
-        
-    if os.path.exists(localVSBDir) and not (os.path.exists(finalDirPath)):
+            os.system("cmd /C rmdir /s /q " + tempDir)
+    elif os.path.exists(localVSBDir) and os.path.exists(finalDirPath):
+        if (getNumberOfFiles(localVSBDir) > 0 and getNumberOfFiles(localVSBDir) == getNumberOfFiles(finalDirPath)):
+            print("================== VERIFIED AND DONE ========================")
+            return
+        else:
+            os.system("cmd /C rmdir /s /q " + localVSBDir)
+            os.makedirs(localVSBDir)
+    
+    if os.path.exists(localVSBDir) and getNumberOfFiles(localVSBDir) > 0 and not (os.path.exists(finalDirPath)):
         print("Found an existing folder for this VSB under " + localVSBDir + " and will use it!")
         print("Copying files...")
         t = threading.Thread(target=animate)
@@ -64,11 +84,10 @@ def main(argv):
         t.join()
         doFinalCheck = True
         tempDir = localVSBDir
-        numSrcFilesCommand = r'cmd /C dir /a:-d /s /b ' + tempDir + r' | find /c ":\"'
         print("DONE Copying from C:\\VSBs\n")
-    elif os.path.exists(targetzip) and not os.path.exists(finalDirPath):
+    elif os.path.exists(targetzip) and (os.path.exists(finalDirPath) == False or getNumberOfFiles(finalDirPath) == 0):
         if (ext == "zip"):
-            print("UNZIPPING... " + targetzip)
+            print("\nUNZIPPING... " + targetzip)
             t = threading.Thread(target=animate)
             t.start()
             with ZipFile(targetzip, 'r') as zipObj:
@@ -78,7 +97,7 @@ def main(argv):
         elif (ext == "tar.gz"):
             t = threading.Thread(target=animate)
             t.start()
-            print("UNTARBALLING... " + targetzip)
+            print("\nUNTARBALLING... " + targetzip)
             os.system(untarCommand)
             done = True
             t.join()
@@ -93,19 +112,19 @@ def main(argv):
             doFinalCheck = True
             print("DONE Unzipping and copying!")
             print("CLEANING UP!")
-            os.system(deleteCommandThread)
+            os.system(copyCommandThread)
             print("DONE CLEANING!\n")
         elif (os.path.exists(finalDirPath)):
             print("DONE Unzipping and copying!")
         else:
             print("Something went wrong and temp directory apepars to be missing...", tempDir, "\n")
     elif os.path.exists(finalDirPath):
-        print("Target directory appears already present: " + finalDirPath)
+        print("Target directory appears already present and contains files: " + finalDirPath)
     else:
         print("Not a valid file!\n")
         
     if (doFinalCheck):
-        if (subprocess.getoutput(numSrcFilesCommand) == subprocess.getoutput(numTgtFilesCommand)):
+        if (getNumberOfFiles(tempDir) > 0 and getNumberOfFiles(tempDir) == getNumberOfFiles(finalDirPath)):
             print("===================== VERIFIED AND DONE =========================")
             return
         else:
