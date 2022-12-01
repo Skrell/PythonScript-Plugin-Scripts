@@ -2,9 +2,9 @@ import os
 import re
 import time
 
-currentFile = notepad.getCurrentFilename().split('.', 1)
+currentFile = notepad.getCurrentFilename().rsplit('.', 1)
 dir_path = os.path.dirname(os.path.realpath(notepad.getCurrentFilename()))
-filename_noext = ((os.path.basename(notepad.getCurrentFilename())).split('.', 1))[0]
+filename_noext = ((os.path.basename(notepad.getCurrentFilename())).rsplit('.', 1))[0]
 ext = currentFile[1].lower()
 org_depth = len(dir_path.split('\\'))
 TOTAL_DEPTH_UP = 3
