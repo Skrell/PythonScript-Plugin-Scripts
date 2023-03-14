@@ -149,7 +149,7 @@ if (wordSelected):
     print (wordSelected)
 
 if (currentFile):
-    if ext in [ 'cpp', 'c', 'h' ]:
+    if ext in [ 'cpp', 'c', 'cc', 'h' ]:
         all_except_ext = currentFile[0]
         if ('h' in ext and wordSelected and ScrollToAttributeDef(lineNumSelected, functionDef)):
             print "found it!"
@@ -161,6 +161,8 @@ if (currentFile):
                 assoc_file = all_except_ext + '.c'
                 if not os.path.exists(assoc_file): 
                     assoc_file = all_except_ext + '.cpp'
+                    if not os.path.exists(assoc_file): 
+                        assoc_file = all_except_ext + '.cc'
             if os.path.exists(assoc_file): 
                 notepad.open(assoc_file)
                 print("Opened: ", assoc_file)
