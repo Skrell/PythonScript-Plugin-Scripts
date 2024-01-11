@@ -83,7 +83,7 @@ def ScrollToAttributeDef(stopLine = 0, isFunction = False, searchingHeader = Fal
                         editor.lineScroll(0,idx - (editor.linesOnScreen()/2))
                         editor.gotoLine(idx)
                         return True
-                    elif not isFunction and searchingHeader and re.search(wordSelected, line):
+                    elif not isFunction and searchingHeader and re.search(r'\b' + wordSelected + r'\b', line):
                         time.sleep(.300)
                         editor.gotoLine(0)
                         editor.lineScroll(0,idx - (editor.linesOnScreen()/2))
@@ -121,20 +121,25 @@ def SearchForOtherFile():
         for root, directories, filenames in os.walk(dir_path + "\\.."*TOTAL_DEPTH_UP + "\\", topdown=True):
             for filename in filenames:  
                 filenames.sort()
-                current_file = os.path.realpath(os.path.join(root, filename))
-                current_file_depth = len(current_file.split('\\'))
-                if (current_file_depth-org_depth) > TOTAL_DEPTH_DOWN:
-                    # print ("I give up! ")
-                    # print (current_file_depth-org_depth)
-                    continue
-                else:
-                    # print (os.path.join(root, filename))
-                    if filename.lower() == (filename_noext.lower()+'.c') or (filename.lower() == filename_noext.lower()+'.cpp'):
-                        notepad.open(os.path.join(root, filename))
-                        killme = True
-                        return killme
-                    else:
+                current_filepath = os.path.realpath(os.path.join(root, filename))
+                # print current_filepath
+                current_file = filename.rsplit('.', 1)
+                if (len(current_file) > 1):
+                    current_ext = current_file[1].lower()
+                    # print current_ext
+                    current_file_depth = len(current_filepath.split('\\'))
+                    if (current_file_depth-org_depth) > TOTAL_DEPTH_DOWN:
+                        # print ("I give up! ")
+                        # print (current_file_depth-org_depth)
                         continue
+                    else:
+                        # print (os.path.join(root, filename))
+                        if (current_file[0].lower() == filename_noext.lower() and current_ext in [ 'cpp', 'c', 'cc', 'h' ]):
+                            notepad.open(os.path.join(root, filename))
+                            killme = True
+                            return killme
+                        else:
+                            continue
     return killme
 
 console.clear()    
